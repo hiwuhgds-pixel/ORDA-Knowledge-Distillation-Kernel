@@ -1,0 +1,19 @@
+
+================================================================================
+[2026-06-10T07:30:10Z] STEP: bench_end_to_end_orda_large
+CMD: /usr/bin/python3 -m tests.benchmarks.bench_end_to_end --output-json /kaggle/working/benchmark_results/json/bench_end_to_end_orda_large.json --output-csv /kaggle/working/benchmark_results/csv/bench_end_to_end_orda_large.csv --mode orda-large
+================================================================================
+W0610 07:30:22.466000 1425 torch/_inductor/utils.py:1679] [0/0] Not enough SMs to use max_autotune_gemm mode
+================================================================================================================================
+End-to-end training benchmark | mode=orda-large cfg=16x1024 repeats=5 steps=15 loss_compile=on
+================================================================================================================================
+Variant          |  Avg step ms |   cv % |     p95 ms |   Throughput tok/s |  Step VRAM MiB |  Loss VRAM MiB
+                                                                                (full step)      (loss only)
+--------------------------------------------------------------------------------------------------------------------------------
+orda_ce          |      5605.15 |    1.6 |    5729.99 |            2923.03 |         8458.1 |         8458.1
+orda_ce_kl       |      5679.24 |    0.7 |    5760.27 |            2884.89 |         8522.1 |         8522.1
+================================================================================================================================
+[ARTIFACT] wrote JSON: /kaggle/working/benchmark_results/json/bench_end_to_end_orda_large.json
+[ARTIFACT] wrote CSV: /kaggle/working/benchmark_results/csv/bench_end_to_end_orda_large.csv
+
+[2026-06-10T07:49:30Z] STEP bench_end_to_end_orda_large exit=0

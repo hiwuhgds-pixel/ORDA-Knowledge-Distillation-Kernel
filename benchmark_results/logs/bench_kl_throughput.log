@@ -1,0 +1,28 @@
+
+================================================================================
+[2026-06-10T05:10:24Z] STEP: bench_kl_throughput
+CMD: /usr/bin/python3 -m tests.benchmarks.bench_kl_throughput --output-json /kaggle/working/benchmark_results/json/bench_kl_throughput.json --output-csv /kaggle/working/benchmark_results/csv/bench_kl_throughput.csv
+================================================================================
+W0610 06:13:06.627000 1118 torch/_inductor/utils.py:1679] [1/1] Not enough SMs to use max_autotune_gemm mode
+====================================================================================================================
+KL throughput benchmark | repeats=5 steps=20 (samples/variant=100) loss_compile=on
+====================================================================================================================
+Config       | Variant              |   Latency ms |   cv % |   vs no_kl |  Peak VRAM MiB |  VRAM delta vs no_kl
+--------------------------------------------------------------------------------------------------------------------
+8x1024    | no_kl                |      3368.38 |    2.2 |      1.00x |         4400.6 |                  0.0
+8x1024    | kl_triton            |      3463.80 |    0.5 |      1.03x |         4464.6 |                 64.0
+8x1024    | fp16_f32_row_sum     |      3955.06 |    0.6 |      1.17x |         5652.6 |               1252.0
+8x1024    | kl_full              |      3952.12 |    0.7 |      1.17x |         5652.6 |               1252.0
+8x1024    | chunked_pytorch_kl   |      4033.59 |    0.7 |      1.20x |         5652.6 |               1252.0
+8x1024    | kl_sample_25         |      3518.21 |    0.4 |      1.04x |         4420.6 |                 20.0
+16x1024    | no_kl                |      5654.64 |    1.0 |      1.00x |         5794.4 |                  0.0
+16x1024    | kl_triton            |      5778.06 |    0.5 |      1.02x |         5858.4 |                 64.0
+16x1024    | fp16_f32_row_sum     |      6851.98 |    0.6 |      1.21x |         8566.6 |               2772.1
+16x1024    | kl_full              |      6872.69 |    0.5 |      1.22x |         8566.6 |               2772.1
+16x1024    | chunked_pytorch_kl   |      7011.89 |    0.5 |      1.24x |         8566.6 |               2772.1
+16x1024    | kl_sample_25         |      5954.20 |    0.7 |      1.05x |         6014.5 |                220.1
+====================================================================================================================
+[ARTIFACT] wrote JSON: /kaggle/working/benchmark_results/json/bench_kl_throughput.json
+[ARTIFACT] wrote CSV: /kaggle/working/benchmark_results/csv/bench_kl_throughput.csv
+
+[2026-06-10T07:02:25Z] STEP bench_kl_throughput exit=0

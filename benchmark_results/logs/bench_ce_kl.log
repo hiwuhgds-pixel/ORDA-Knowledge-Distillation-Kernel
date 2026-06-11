@@ -1,0 +1,25 @@
+
+================================================================================
+[2026-06-10T04:53:37Z] STEP: bench_ce_kl
+CMD: /usr/bin/python3 -m tests.benchmarks.bench_ce_kl --output-json /kaggle/working/benchmark_results/json/bench_ce_kl.json --output-csv /kaggle/working/benchmark_results/csv/bench_ce_kl.csv
+================================================================================
+========================================================================================
+Orda joint CE+KL benchmark (repeats=5, steps=20, loss_compile=on)
+========================================================================================
+Device: Tesla T4
+Vocab size: 32768 | Hidden dim: 4096
+Config         | Method                       |   Latency ms |  Peak VRAM MiB
+----------------------------------------------------------------------------------------
+8x1024       | PyTorch CE+KL separate       | 663.99 (cv 2.8%) |         1936.6
+8x1024       | Orda fused CE+KL             | 620.15 (cv 0.9%) |         1168.3
+4x2048       | PyTorch CE+KL separate       | 662.58 (cv 0.8%) |         1936.6
+4x2048       | Orda fused CE+KL             | 621.83 (cv 0.2%) |         1168.3
+16x1024       | PyTorch CE+KL separate       | 1404.46 (cv 0.9%) |         3600.9
+16x1024       | Orda fused CE+KL             | 1241.01 (cv 0.1%) |         1552.4
+8x2048       | PyTorch CE+KL separate       | 1409.96 (cv 1.0%) |         3600.9
+8x2048       | Orda fused CE+KL             | 1240.85 (cv 0.2%) |         1552.4
+========================================================================================
+[ARTIFACT] wrote JSON: /kaggle/working/benchmark_results/json/bench_ce_kl.json
+[ARTIFACT] wrote CSV: /kaggle/working/benchmark_results/csv/bench_ce_kl.csv
+
+[2026-06-10T05:10:11Z] STEP bench_ce_kl exit=0

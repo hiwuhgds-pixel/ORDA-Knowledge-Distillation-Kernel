@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "orda-ce-kernel"
+version = "0.1.0"
+description = "ORDA fused cross entropy and KL distillation loss kernels"
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.1",
+    "triton; platform_system != 'Windows'",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests/unit",
+    "tests/correctness",
+]
+markers = [
+    "gpu: requires CUDA/HIP and Triton kernels",
+    "benchmark: benchmark smoke or artifact tests",
+]

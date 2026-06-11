@@ -1,0 +1,207 @@
+device : cuda
+GPU    : Tesla T4
+dtype  : torch.float16 | batch=16 | teacher_layers=8 | student_layers=4 | warmup=1 | measured_iters=1 | T=3.0
+modes  : ['torch-compile', 'orda']
+delta  : chi so sanh loss_ce_kl_extra_mb, khong so sanh tong VRAM
+
+
+-- dim=512 vocab=32k seq=256 --
+  torch-compile ... W0610 08:27:11.200000 30502 torch/_inductor/utils.py:1731] [0/0] Not enough SMs to use max_autotune_gemm mode
+model        346.0 MB  CE+KL       1064.1 MB
+           orda ... model        353.5 MB  CE+KL        406.3 MB
+  CE+KL delta orda vs torch-compile: -657.8 MB (-61.8%)
+
+-- dim=512 vocab=32k seq=512 --
+  torch-compile ... model        654.8 MB  CE+KL       2096.3 MB
+           orda ... model        654.8 MB  CE+KL        422.7 MB
+  CE+KL delta orda vs torch-compile: -1673.5 MB (-79.8%)
+
+-- dim=512 vocab=32k seq=1024 --
+  torch-compile ... model       1288.1 MB  CE+KL       4160.5 MB
+           orda ... model       1288.1 MB  CE+KL        454.1 MB
+  CE+KL delta orda vs torch-compile: -3706.4 MB (-89.1%)
+
+-- dim=512 vocab=32k seq=2048 --
+  torch-compile ... model       2555.0 MB  CE+KL       8289.0 MB
+           orda ... model       2555.0 MB  CE+KL        518.3 MB
+  CE+KL delta orda vs torch-compile: -7770.7 MB (-93.7%)
+
+-- dim=512 vocab=64k seq=256 --
+  torch-compile ... model        353.5 MB  CE+KL       2120.1 MB
+           orda ... model        353.5 MB  CE+KL        467.0 MB
+  CE+KL delta orda vs torch-compile: -1653.1 MB (-78.0%)
+
+-- dim=512 vocab=64k seq=512 --
+  torch-compile ... model        654.8 MB  CE+KL       4176.3 MB
+           orda ... model        654.8 MB  CE+KL        483.1 MB
+  CE+KL delta orda vs torch-compile: -3693.2 MB (-88.4%)
+
+-- dim=512 vocab=64k seq=1024 --
+  torch-compile ... model       1288.1 MB  CE+KL       8288.5 MB
+           orda ... model       1288.1 MB  CE+KL        515.1 MB
+  CE+KL delta orda vs torch-compile: -7773.4 MB (-93.8%)
+
+-- dim=512 vocab=64k seq=2048 --
+  torch-compile ... model          OOM MB  CE+KL          OOM MB
+           orda ... model       2555.0 MB  CE+KL        579.3 MB
+  CE+KL delta orda vs torch-compile: OOM
+
+-- dim=512 vocab=128k seq=256 --
+  torch-compile ... model        349.5 MB  CE+KL       4232.1 MB
+           orda ... model        349.5 MB  CE+KL        915.0 MB
+  CE+KL delta orda vs torch-compile: -3317.1 MB (-78.4%)
+
+-- dim=512 vocab=128k seq=512 --
+  torch-compile ... model        654.8 MB  CE+KL       8336.3 MB
+           orda ... model        654.8 MB  CE+KL        931.1 MB
+  CE+KL delta orda vs torch-compile: -7405.2 MB (-88.8%)
+
+-- dim=512 vocab=128k seq=1024 --
+  torch-compile ... model          OOM MB  CE+KL          OOM MB
+           orda ... model       1288.8 MB  CE+KL        963.1 MB
+  CE+KL delta orda vs torch-compile: OOM
+
+-- dim=512 vocab=128k seq=2048 --
+  torch-compile ... model          OOM MB  CE+KL          OOM MB
+           orda ... model       2554.6 MB  CE+KL       1027.3 MB
+  CE+KL delta orda vs torch-compile: OOM
+
+-- dim=1024 vocab=32k seq=256 --
+  torch-compile ... model        724.1 MB  CE+KL       1104.1 MB
+           orda ... model        724.1 MB  CE+KL        492.0 MB
+  CE+KL delta orda vs torch-compile: -612.1 MB (-55.4%)
+
+-- dim=1024 vocab=32k seq=512 --
+  torch-compile ... model       1354.8 MB  CE+KL       2144.3 MB
+           orda ... model       1354.8 MB  CE+KL        524.1 MB
+  CE+KL delta orda vs torch-compile: -1620.2 MB (-75.6%)
+
+-- dim=1024 vocab=32k seq=1024 --
+  torch-compile ... model       2616.6 MB  CE+KL       4224.5 MB
+           orda ... model       2616.6 MB  CE+KL        590.1 MB
+  CE+KL delta orda vs torch-compile: -3634.4 MB (-86.0%)
+
+-- dim=1024 vocab=32k seq=2048 --
+  torch-compile ... model       5147.1 MB  CE+KL       8385.0 MB
+           orda ... model       5147.1 MB  CE+KL        716.3 MB
+  CE+KL delta orda vs torch-compile: -7668.7 MB (-91.5%)
+
+-- dim=1024 vocab=64k seq=256 --
+  torch-compile ... model        724.1 MB  CE+KL       2192.1 MB
+           orda ... model        724.1 MB  CE+KL        614.0 MB
+  CE+KL delta orda vs torch-compile: -1578.1 MB (-72.0%)
+
+-- dim=1024 vocab=64k seq=512 --
+  torch-compile ... model       1354.8 MB  CE+KL       4256.3 MB
+           orda ... model       1354.8 MB  CE+KL        647.6 MB
+  CE+KL delta orda vs torch-compile: -3608.7 MB (-84.8%)
+
+-- dim=1024 vocab=64k seq=1024 --
+  torch-compile ... model       2616.6 MB  CE+KL       8384.5 MB
+           orda ... model       2616.6 MB  CE+KL        711.1 MB
+  CE+KL delta orda vs torch-compile: -7673.4 MB (-91.5%)
+
+-- dim=1024 vocab=64k seq=2048 --
+  torch-compile ... model          OOM MB  CE+KL          OOM MB
+           orda ... model       5147.1 MB  CE+KL        839.3 MB
+  CE+KL delta orda vs torch-compile: OOM
+
+-- dim=1024 vocab=128k seq=256 --
+  torch-compile ... model        724.1 MB  CE+KL       4368.1 MB
+           orda ... model        724.1 MB  CE+KL       1190.0 MB
+  CE+KL delta orda vs torch-compile: -3178.1 MB (-72.8%)
+
+-- dim=1024 vocab=128k seq=512 --
+  torch-compile ... model       1354.8 MB  CE+KL       8480.3 MB
+           orda ... model       1354.8 MB  CE+KL       1223.6 MB
+  CE+KL delta orda vs torch-compile: -7256.7 MB (-85.6%)
+
+-- dim=1024 vocab=128k seq=1024 --
+  torch-compile ... model          OOM MB  CE+KL          OOM MB
+           orda ... model       2616.6 MB  CE+KL       1287.1 MB
+  CE+KL delta orda vs torch-compile: OOM
+
+-- dim=1024 vocab=128k seq=2048 --
+  torch-compile ... model          OOM MB  CE+KL          OOM MB
+           orda ... model       5147.1 MB  CE+KL       1415.3 MB
+  CE+KL delta orda vs torch-compile: OOM
+
+SUMMARY
+  dim   vocab    seq           mode      model MB      CE+KL MB  alloc after model MB
+-------------------------------------------------------------------------------------
+  512     32k    256  torch-compile         346.0        1064.1                 619.9
+  512     32k    256           orda         353.5         406.3                 625.0
+  512     32k    512  torch-compile         654.8        2096.3                 923.8
+  512     32k    512           orda         654.8         422.7                 923.8
+  512     32k   1024  torch-compile        1288.1        4160.5                1552.2
+  512     32k   1024           orda        1288.1         454.1                1552.2
+  512     32k   2048  torch-compile        2555.0        8289.0                2809.4
+  512     32k   2048           orda        2555.0         518.3                2809.4
+  512     64k    256  torch-compile         353.5        2120.1                 753.0
+  512     64k    256           orda         353.5         467.0                 753.0
+  512     64k    512  torch-compile         654.8        4176.3                1051.8
+  512     64k    512           orda         654.8         483.1                1051.8
+  512     64k   1024  torch-compile        1288.1        8288.5                1680.2
+  512     64k   1024           orda        1288.1         515.1                1680.2
+  512     64k   2048  torch-compile           OOM           OOM                   OOM
+  512     64k   2048           orda        2555.0         579.3                2937.4
+  512    128k    256  torch-compile         349.5        4232.1                1005.0
+  512    128k    256           orda         349.5         915.0                1005.0
+  512    128k    512  torch-compile         654.8        8336.3                1307.8
+  512    128k    512           orda         654.8         931.1                1307.8
+  512    128k   1024  torch-compile           OOM           OOM                   OOM
+  512    128k   1024           orda        1288.8         963.1                1937.0
+  512    128k   2048  torch-compile           OOM           OOM                   OOM
+  512    128k   2048           orda        2554.6        1027.3                3193.1
+ 1024     32k    256  torch-compile         724.1        1104.1                1535.4
+ 1024     32k    256           orda         724.1         492.0                1535.4
+ 1024     32k    512  torch-compile        1354.8        2144.3                2161.1
+ 1024     32k    512           orda        1354.8         524.1                2161.1
+ 1024     32k   1024  torch-compile        2616.6        4224.5                3413.0
+ 1024     32k   1024           orda        2616.6         590.1                3413.0
+ 1024     32k   2048  torch-compile        5147.1        8385.0                5923.9
+ 1024     32k   2048           orda        5147.1         716.3                5923.9
+ 1024     64k    256  torch-compile         724.1        2192.1                1783.4
+ 1024     64k    256           orda         724.1         614.0                1783.4
+ 1024     64k    512  torch-compile        1354.8        4256.3                2409.1
+ 1024     64k    512           orda        1354.8         647.6                2409.1
+ 1024     64k   1024  torch-compile        2616.6        8384.5                3661.0
+ 1024     64k   1024           orda        2616.6         711.1                3661.0
+ 1024     64k   2048  torch-compile           OOM           OOM                   OOM
+ 1024     64k   2048           orda        5147.1         839.3                6171.9
+ 1024    128k    256  torch-compile         724.1        4368.1                2295.4
+ 1024    128k    256           orda         724.1        1190.0                2295.4
+ 1024    128k    512  torch-compile        1354.8        8480.3                2921.1
+ 1024    128k    512           orda        1354.8        1223.6                2921.1
+ 1024    128k   1024  torch-compile           OOM           OOM                   OOM
+ 1024    128k   1024           orda        2616.6        1287.1                4173.0
+ 1024    128k   2048  torch-compile           OOM           OOM                   OOM
+ 1024    128k   2048           orda        5147.1        1415.3                6683.9
+
+CE+KL VRAM DELTA ONLY
+  dim   vocab    seq   torch CE+KL MB    orda CE+KL MB    delta MB    delta %
+-----------------------------------------------------------------------------
+  512     32k    256           1064.1            406.3      -657.8     -61.8%
+  512     32k    512           2096.3            422.7     -1673.5     -79.8%
+  512     32k   1024           4160.5            454.1     -3706.4     -89.1%
+  512     32k   2048           8289.0            518.3     -7770.7     -93.7%
+  512     64k    256           2120.1            467.0     -1653.1     -78.0%
+  512     64k    512           4176.3            483.1     -3693.2     -88.4%
+  512     64k   1024           8288.5            515.1     -7773.4     -93.8%
+  512     64k   2048              OOM              OOM         OOM        OOM
+  512    128k    256           4232.1            915.0     -3317.1     -78.4%
+  512    128k    512           8336.3            931.1     -7405.2     -88.8%
+  512    128k   1024              OOM              OOM         OOM        OOM
+  512    128k   2048              OOM              OOM         OOM        OOM
+ 1024     32k    256           1104.1            492.0      -612.1     -55.4%
+ 1024     32k    512           2144.3            524.1     -1620.2     -75.6%
+ 1024     32k   1024           4224.5            590.1     -3634.4     -86.0%
+ 1024     32k   2048           8385.0            716.3     -7668.7     -91.5%
+ 1024     64k    256           2192.1            614.0     -1578.1     -72.0%
+ 1024     64k    512           4256.3            647.6     -3608.7     -84.8%
+ 1024     64k   1024           8384.5            711.1     -7673.4     -91.5%
+ 1024     64k   2048              OOM              OOM         OOM        OOM
+ 1024    128k    256           4368.1           1190.0     -3178.1     -72.8%
+ 1024    128k    512           8480.3           1223.6     -7256.7     -85.6%
+ 1024    128k   1024              OOM              OOM         OOM        OOM
+ 1024    128k   2048              OOM              OOM         OOM        OOM

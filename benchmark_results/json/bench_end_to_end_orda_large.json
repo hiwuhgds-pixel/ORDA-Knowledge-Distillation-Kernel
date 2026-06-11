@@ -1,0 +1,87 @@
+{
+  "metadata": {
+    "args": {
+      "batch_size": 16,
+      "heads": 8,
+      "hidden_dim": 2048,
+      "kl_temperature": 1.5,
+      "kl_weight": 0.5,
+      "layers": 2,
+      "mode": "orda-large",
+      "no_compile": false,
+      "output_csv": "/kaggle/working/benchmark_results/csv/bench_end_to_end_orda_large.csv",
+      "output_json": "/kaggle/working/benchmark_results/json/bench_end_to_end_orda_large.json",
+      "repeats": 5,
+      "seed": 42,
+      "seq_len": 1024,
+      "steps": 15,
+      "vocab_size": 32768,
+      "warmup": 5
+    },
+    "benchmark": "bench_end_to_end",
+    "cuda": "12.8",
+    "device": {
+      "capability": [
+        7,
+        5
+      ],
+      "name": "Tesla T4",
+      "total_memory_mib": 14912
+    },
+    "hip": null,
+    "platform": "Linux-6.6.122+-x86_64-with-glibc2.35",
+    "python": "3.12.12",
+    "timestamp_utc": "2026-06-10T07:49:28.957241+00:00",
+    "torch": "2.10.0+cu128"
+  },
+  "rows": [
+    {
+      "batch_size": 16,
+      "config": "16x1024",
+      "cv_pct": 1.6461063327753669,
+      "heads": 8,
+      "hidden_dim": 2048,
+      "latency_ms": 5605.151503265881,
+      "latency_ms_max": 6099.7177734375,
+      "latency_ms_min": 5460.65185546875,
+      "latency_ms_p50": 5593.7744140625,
+      "latency_ms_p95": 5729.99140625,
+      "latency_ms_std": 92.26675385691334,
+      "layers": 2,
+      "loss_compile": true,
+      "method": "orda_ce",
+      "mode": "orda-large",
+      "peak_vram_loss_only_mib": 8458.11767578125,
+      "peak_vram_mib": 8458.11767578125,
+      "repeats": 5,
+      "seq_len": 1024,
+      "status": "ok",
+      "tokens_per_second": 2923.0253616612767,
+      "vocab_size": 32768
+    },
+    {
+      "batch_size": 16,
+      "config": "16x1024",
+      "cv_pct": 0.6662929038685426,
+      "heads": 8,
+      "hidden_dim": 2048,
+      "latency_ms": 5679.236664318648,
+      "latency_ms_max": 5795.5185546875,
+      "latency_ms_min": 5605.61962890625,
+      "latency_ms_p50": 5675.8486328125,
+      "latency_ms_p95": 5760.266406250001,
+      "latency_ms_std": 37.84035088825567,
+      "layers": 2,
+      "loss_compile": true,
+      "method": "orda_ce_kl",
+      "mode": "orda-large",
+      "peak_vram_loss_only_mib": 8522.1181640625,
+      "peak_vram_mib": 8522.1181640625,
+      "repeats": 5,
+      "seq_len": 1024,
+      "status": "ok",
+      "tokens_per_second": 2884.894743502581,
+      "vocab_size": 32768
+    }
+  ]
+}

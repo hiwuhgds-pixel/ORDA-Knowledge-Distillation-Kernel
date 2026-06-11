@@ -1,0 +1,9 @@
+
+================================================================================
+[2026-06-10T04:37:14Z] STEP: gate0_ast_imports
+CMD: /usr/bin/python3 scripts/check_ast_imports.py
+================================================================================
+[OK] AST parse: clean.
+[OK] Import hygiene: no sys.path / sitecustomize / PYTHONPATH usage.
+
+[2026-06-10T04:37:14Z] STEP gate0_ast_imports exit=0

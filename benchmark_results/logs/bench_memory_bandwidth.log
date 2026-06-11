@@ -1,0 +1,24 @@
+
+================================================================================
+[2026-06-10T07:02:25Z] STEP: bench_memory_bandwidth
+CMD: /usr/bin/python3 -m tests.benchmarks.bench_memory_bandwidth --output-json /kaggle/working/benchmark_results/json/bench_memory_bandwidth.json --output-csv /kaggle/working/benchmark_results/csv/bench_memory_bandwidth.csv --verify
+================================================================================
+====================================================================================================
+Estimated memory bandwidth benchmark
+====================================================================================================
+Config       | Method           |   Latency ms |  Traffic GiB |   Est. GiB/s
+----------------------------------------------------------------------------------------------------
+[VERIFY] 4x2048: finite CE/CE+KL loss and gradient sanity checks passed.
+4x2048    | pytorch_ce_kl    |     672.71 ( 2.8%) |        7.250 |        10.78
+4x2048    | orda_ce          |     601.56 ( 0.9%) |        2.750 |         4.57
+4x2048    | orda_ce_kl       |     619.50 ( 0.6%) |        3.250 |         5.25
+[VERIFY] 8x2048: finite CE/CE+KL loss and gradient sanity checks passed.
+8x2048    | pytorch_ce_kl    |    1398.55 ( 0.9%) |       13.500 |         9.65
+8x2048    | orda_ce          |    1173.62 ( 0.5%) |        5.000 |         4.26
+8x2048    | orda_ce_kl       |    1209.39 ( 0.2%) |        6.000 |         4.96
+====================================================================================================
+[VERIFY] Use Nsight Compute for authoritative DRAM/L2 traffic; estimates remain relative.
+[ARTIFACT] wrote JSON: /kaggle/working/benchmark_results/json/bench_memory_bandwidth.json
+[ARTIFACT] wrote CSV: /kaggle/working/benchmark_results/csv/bench_memory_bandwidth.csv
+
+[2026-06-10T07:14:32Z] STEP bench_memory_bandwidth exit=0

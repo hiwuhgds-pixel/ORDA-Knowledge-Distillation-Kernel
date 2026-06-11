@@ -1,0 +1,20 @@
+
+================================================================================
+[2026-06-10T07:14:32Z] STEP: bench_end_to_end_compare
+CMD: /usr/bin/python3 -m tests.benchmarks.bench_end_to_end --output-json /kaggle/working/benchmark_results/json/bench_end_to_end_compare.json --output-csv /kaggle/working/benchmark_results/csv/bench_end_to_end_compare.csv --mode compare
+================================================================================
+W0610 07:14:44.937000 1325 torch/_inductor/utils.py:1679] [0/0] Not enough SMs to use max_autotune_gemm mode
+================================================================================================================================
+End-to-end training benchmark | mode=compare cfg=8x1024 repeats=5 steps=15 loss_compile=on
+================================================================================================================================
+Variant          |  Avg step ms |   cv % |     p95 ms |   Throughput tok/s |  Step VRAM MiB |  Loss VRAM MiB
+                                                                                (full step)      (loss only)
+--------------------------------------------------------------------------------------------------------------------------------
+pytorch          |      3975.39 |    2.1 |    4146.87 |            2060.68 |         9489.4 |         7441.5
+orda_ce          |      2504.57 |    0.9 |    2552.86 |            3270.82 |         6057.3 |         6057.3
+orda_ce_kl       |      2539.93 |    0.8 |    2588.73 |            3225.29 |         6121.3 |         6121.3
+================================================================================================================================
+[ARTIFACT] wrote JSON: /kaggle/working/benchmark_results/json/bench_end_to_end_compare.json
+[ARTIFACT] wrote CSV: /kaggle/working/benchmark_results/csv/bench_end_to_end_compare.csv
+
+[2026-06-10T07:30:10Z] STEP bench_end_to_end_compare exit=0
