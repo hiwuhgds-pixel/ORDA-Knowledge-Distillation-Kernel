@@ -76,6 +76,14 @@ out = distillation_loss(
 out.loss.backward()
 ```
 
+## Demo Notebook
+
+A sample Colab/Kaggle notebook showing how to use the ORDA kernel with HF Llama 3.2 and compare it against a torch.compile baseline.
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hiwuhgds-pixel/ORDA-Knowledge-Distillation-Kernel/blob/main/notebooks/llama32_distillation_demo.ipynb)
+
+[View the Llama 3.2 distillation demo notebook on GitHub](https://github.com/hiwuhgds-pixel/ORDA-Knowledge-Distillation-Kernel/blob/main/notebooks/llama32_distillation_demo.ipynb)
+
 ## Validation and Benchmarks
 
 The full test and benchmark guide lives in
@@ -181,6 +189,30 @@ including CE logits, backward buffers, GEMM workspace, gradients, and allocator
 overhead. The `2 * [BT, V]` to `[n_rows, V]` change above is the core KL memory
 reduction, excluding any additional `[BT, V]` elementwise KL tensor that a
 compiled graph may materialize.
+
+## Performance Strategy
+
+KL Triton reuses the `logits_chunk` already created inside the fused CE chunk
+loop, so it does not need to run a separate projection/logits branch for KL. The
+kernel reads clean student/teacher logits in the chunk before CE overwrites that
+buffer with CE gradients, computes forward KL and the student KL gradient, then
+adds the KL gradient into the student slice of the same buffer before it
+continues through CE/GEMM backward.
+
+Because KL reuses the same logits buffer and backward lifecycle as CE, adding KL
+only increases latency by a small amount compared with the no-KL baseline. In
+the Tesla T4 KL throughput benchmark, case
+[`16x1024`](benchmark_results/logs/bench_kl_throughput.log) shows `kl_triton`
+at `5778.06 ms`, compared with `5654.64 ms` for the `no_kl` baseline, or about
+`2.2%` overhead.
+
+In the experimental `TiedTeacher` training benchmark (`CE_s + CE_t + KL`), case
+[`vocab=128k seq=512`](simulate/Train_TiedTeacher.txt) shows ORDA at
+`1206.01 ms/step`, compared with `1357.12 ms/step` for `torch-compile`, or
+about `11.1%` faster.
+
+These numbers should be rerun on the target GPU before making hardware-specific
+claims.
 
 ## Scope and Teacher Modes
 
@@ -292,6 +324,10 @@ distillation and efficient loss kernels:
   kernels. The overlap is in general technical directions such as chunking and
   in-place gradient storage. ORDA applies these directions within a separate
   teacher-student forward-KL distillation lifecycle.
+- The demo notebook uses
+  [`unsloth/Llama-3.2-1B`](https://huggingface.co/unsloth/Llama-3.2-1B) and
+  [`Salesforce/wikitext`](https://huggingface.co/datasets/Salesforce/wikitext)
+  from Hugging Face.
 
 ## Expert Tuning
 

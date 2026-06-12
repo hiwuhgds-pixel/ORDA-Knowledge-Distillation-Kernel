@@ -1,0 +1,48 @@
+  ────────────────────────────────────────────────────────────
+  RUN 1: Distillation using ORDA Kernel
+  ────────────────────────────────────────────────────────────
+W0612 13:05:28.921000 1058 torch/_inductor/utils.py:1731] [0/0] Not enough SMs to use max_autotune_gemm mode
+update=   20/200   | loss= 16.1800 | ce= 10.9965 | kl= 10.3670 | lr= 2.00e-04 | speed=   2282 tok/s | alloc_peak=   5943 MB
+update=   40/200   | loss= 12.4168 | ce=  8.4522 | kl=  7.9292 | lr= 2.98e-04 | speed=   2624 tok/s | alloc_peak=   5943 MB
+update=   60/200   | loss= 10.0857 | ce=  7.0118 | kl=  6.1478 | lr= 2.80e-04 | speed=   2621 tok/s | alloc_peak=   5943 MB
+update=   80/200   | loss=  9.3950 | ce=  6.6011 | kl=  5.5879 | lr= 2.46e-04 | speed=   2619 tok/s | alloc_peak=   5943 MB
+update=  100/200   | loss=  8.9651 | ce=  6.3359 | kl=  5.2583 | lr= 2.02e-04 | speed=   2622 tok/s | alloc_peak=   5943 MB
+update=  120/200   | loss=  8.7154 | ce=  6.1982 | kl=  5.0345 | lr= 1.53e-04 | speed=   2623 tok/s | alloc_peak=   5943 MB
+update=  140/200   | loss=  8.5173 | ce=  6.0839 | kl=  4.8668 | lr= 1.05e-04 | speed=   2621 tok/s | alloc_peak=   5943 MB
+update=  160/200   | loss=  8.3573 | ce=  5.9705 | kl=  4.7737 | lr= 6.52e-05 | speed=   2619 tok/s | alloc_peak=   5943 MB
+update=  180/200   | loss=  8.2466 | ce=  5.8976 | kl=  4.6981 | lr= 3.91e-05 | speed=   2621 tok/s | alloc_peak=   5943 MB
+update=  200/200   | loss=  8.1843 | ce=  5.8687 | kl=  4.6312 | lr= 3.00e-05 | speed=   2617 tok/s | alloc_peak=   5943 MB
+
+  ↳ Saved checkpoint: ./checkpoints_comparison/student_orda_final.pt
+
+┌────────────────────────────────────────────────┐
+│             Demo Summary (ORDA Run)                           │
+├────────────────────────────────────────────────┤
+│  GPU Model   : Tesla T4 (Total VRAM: 14913 MB)                │
+│  Peak Tensor Alloc : 5943 MB                                  │
+│  Throughput  : 2617 tok/s                                     │
+│  Final Loss  : 8.1843                                         │
+└────────────────────────────────────────────────┘
+
+  ────────────────────────────────────────────────────────────
+  RUN 2: Distillation using torch.compile Baseline
+  ────────────────────────────────────────────────────────────
+update=   20/200   | loss= 16.1798 | ce= 10.9964 | kl= 10.3670 | lr= 2.00e-04 | speed=   2253 tok/s | alloc_peak=   9080 MB
+update=   40/200   | loss= 12.4165 | ce=  8.4520 | kl=  7.9290 | lr= 2.98e-04 | speed=   2555 tok/s | alloc_peak=   9080 MB
+update=   60/200   | loss= 10.0838 | ce=  7.0101 | kl=  6.1473 | lr= 2.80e-04 | speed=   2545 tok/s | alloc_peak=   9080 MB
+update=   80/200   | loss=  9.3953 | ce=  6.6017 | kl=  5.5872 | lr= 2.46e-04 | speed=   2551 tok/s | alloc_peak=   9080 MB
+update=  100/200   | loss=  8.9549 | ce=  6.3298 | kl=  5.2504 | lr= 2.02e-04 | speed=   2551 tok/s | alloc_peak=   9080 MB
+update=  120/200   | loss=  8.7059 | ce=  6.1925 | kl=  5.0268 | lr= 1.53e-04 | speed=   2541 tok/s | alloc_peak=   9080 MB
+update=  140/200   | loss=  8.5087 | ce=  6.0785 | kl=  4.8604 | lr= 1.05e-04 | speed=   2543 tok/s | alloc_peak=   9080 MB
+update=  160/200   | loss=  8.3491 | ce=  5.9654 | kl=  4.7673 | lr= 6.52e-05 | speed=   2554 tok/s | alloc_peak=   9080 MB
+update=  180/200   | loss=  8.2380 | ce=  5.8917 | kl=  4.6925 | lr= 3.91e-05 | speed=   2555 tok/s | alloc_peak=   9080 MB
+update=  200/200   | loss=  8.1760 | ce=  5.8633 | kl=  4.6254 | lr= 3.00e-05 | speed=   2543 tok/s | alloc_peak=   9080 MB
+
+┌────────────────────────────────────────────────┐
+│             Demo Summary (Baseline Run)                       │
+├────────────────────────────────────────────────┤
+│  GPU Model   : Tesla T4 (Total VRAM: 14913 MB)                │
+│  Peak Tensor Alloc : 9080 MB                                  │
+│  Throughput  : 2543 tok/s                                     │
+│  Final Loss  : 8.1760                                         │
+└────────────────────────────────────────────────┘

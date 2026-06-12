@@ -75,10 +75,18 @@ out = distillation_loss(
 out.loss.backward()
 ```
 
+## Notebook demo
+
+Notebook mẫu trên Colab/Kaggle minh họa cách dùng ORDA kernel với HF Llama 3.2, đồng thời so sánh với baseline torch.compile.
+
+[![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/hiwuhgds-pixel/ORDA-Knowledge-Distillation-Kernel/blob/main/notebooks/llama32_distillation_demo.ipynb)
+
+[Xem notebook demo Llama 3.2 distillation trên GitHub](https://github.com/hiwuhgds-pixel/ORDA-Knowledge-Distillation-Kernel/blob/main/notebooks/llama32_distillation_demo.ipynb)
+
 ## Validation và benchmark
 
 Hướng dẫn test và benchmark đầy đủ nằm ở
-[`tests/TESTING_EN.md`](tests/TESTING_EN.md). Các correctness test CUDA/Triton
+[`tests/TESTING_VI.md`](tests/TESTING_VI.md). Các correctness test CUDA/Triton
 cần môi trường GPU thật:
 
 ```bash
@@ -87,7 +95,7 @@ python scripts/run_all_test_colab.py
 ```
 
 Các ví dụ benchmark smoke được ghi trong
-[`tests/TESTING_EN.md`](tests/TESTING_EN.md#benchmarks). Các con số benchmark
+[`tests/TESTING_VI.md`](tests/TESTING_VI.md#benchmarks). Các con số benchmark
 hiện tại nên được chạy lại trên GPU mục tiêu trước khi dùng để đưa ra nhận định
 riêng cho phần cứng đó.
 
@@ -181,6 +189,29 @@ bao gồm CE logits, backward buffers, GEMM workspace, gradients, và allocator
 overhead. Thay đổi từ `2 * [BT, V]` xuống `[n_rows, V]` ở trên là phần giảm bộ
 nhớ KL cốt lõi, chưa tính bất kỳ tensor KL elementwise `[BT, V]` bổ sung nào mà
 compiled graph có thể materialize.
+
+## Chiến lược hiệu năng
+
+KL Triton tái sử dụng `logits_chunk` đã được tạo trong fused CE chunk loop, nên
+không cần chạy thêm một nhánh projection/logits riêng cho KL. Kernel đọc
+student/teacher logits sạch trong chunk trước khi CE ghi đè buffer này thành CE
+gradient, tính forward KL và student KL gradient, rồi cộng gradient KL vào
+student slice của cùng buffer để đi tiếp qua CE/GEMM backward.
+
+Nhờ reuse cùng logits buffer và cùng lifecycle backward với CE, chi phí thêm KL
+chỉ tăng một phần nhỏ so với baseline không dùng KL. Trong benchmark throughput
+KL trên Tesla T4, case
+[`16x1024`](benchmark_results/logs/bench_kl_throughput.log) cho thấy
+`kl_triton` đạt `5778.06 ms`, so với `5654.64 ms` của baseline `no_kl`, tương
+đương overhead khoảng `2.2%`.
+
+Trong benchmark training thử nghiệm với `TiedTeacher` (`CE_s + CE_t + KL`),
+case [`vocab=128k seq=512`](simulate/Train_TiedTeacher.txt) cho thấy ORDA đạt
+`1206.01 ms/step`, so với `1357.12 ms/step` của `torch-compile`, tức nhanh hơn
+khoảng `11.1%`.
+
+Các số liệu này nên được chạy lại trên GPU mục tiêu trước khi dùng để đưa ra
+nhận định riêng cho phần cứng đó.
 
 ## Scope và Teacher Modes
 
@@ -287,6 +318,10 @@ loss kernel hiệu quả:
   với Cross Entropy kernels. Phần giao nhau nằm ở các hướng kỹ thuật chung như
   chia chunk và lưu gradient in-place. ORDA áp dụng các hướng này trong một
   lifecycle teacher-student forward-KL distillation riêng.
+- Notebook demo sử dụng
+  [`unsloth/Llama-3.2-1B`](https://huggingface.co/unsloth/Llama-3.2-1B) và
+  [`Salesforce/wikitext`](https://huggingface.co/datasets/Salesforce/wikitext)
+  từ Hugging Face.
 
 ## Tùy chỉnh nâng cao
 
