@@ -408,7 +408,11 @@ class PrecomputedCEFunction(torch.autograd.Function):
         ctx.save_for_backward(grad_student_hidden, grad_weight, mean_scale)
         ctx.compute_grad = compute_grad
 
-        return loss, loss_s.detach(), loss_t.detach(), kl_loss.detach()
+        loss_s_out = loss_s.detach()
+        loss_t_out = loss_t.detach()
+        kl_loss_out = kl_loss.detach()
+        ctx.mark_non_differentiable(loss_s_out, loss_t_out, kl_loss_out)
+        return loss, loss_s_out, loss_t_out, kl_loss_out
 
     @staticmethod
     def backward(ctx, grad_output, _gs=None, _gt=None, _gkl=None):
