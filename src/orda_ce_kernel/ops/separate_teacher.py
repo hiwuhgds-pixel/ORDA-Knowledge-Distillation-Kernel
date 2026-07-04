@@ -457,6 +457,9 @@ class SeparateStudentCEFunction(torch.autograd.Function):
         V = weight.shape[0]
         device = student_hidden.device
 
+        need_grad_student_hidden = student_hidden.requires_grad
+        need_grad_weight = weight.requires_grad
+
         # ── Normalize inputs and compute dtype ──────────────────────────────
         student_hidden = student_hidden.contiguous()
         teacher_hidden = teacher_hidden.contiguous()
@@ -473,10 +476,9 @@ class SeparateStudentCEFunction(torch.autograd.Function):
         teacher_hidden_c = teacher_hidden if teacher_hidden.dtype == compute_dtype else teacher_hidden.to(compute_dtype)
 
         # ── Allocate saved gradients ────────────────────────────────────────
-        compute_grad = student_hidden.requires_grad or weight.requires_grad
-        grad_student_hidden = torch.zeros_like(student_hidden) if student_hidden.requires_grad else None
+        compute_grad = need_grad_student_hidden or need_grad_weight
+        grad_student_hidden = torch.zeros_like(student_hidden) if need_grad_student_hidden else None
         grad_weight = None
-        need_grad_weight = weight.requires_grad
 
         # ── Resolve chunking and accumulators ───────────────────────────────
         chunk_size_actual, num_chunks = resolve_chunk_size(BT, chunk_size, V=V, max_chunks=max_chunks)
@@ -680,6 +682,11 @@ class SeparateFullCEFunction(torch.autograd.Function):
         V = weight.shape[0]
         device = student_hidden.device
 
+        need_grad_student_hidden = student_hidden.requires_grad
+        need_grad_teacher_hidden = teacher_hidden.requires_grad
+        need_grad_weight = weight.requires_grad
+        need_grad_teacher_weight = teacher_weight.requires_grad
+
         # ── Normalize inputs and compute dtype ──────────────────────────────
         student_hidden = student_hidden.contiguous()
         teacher_hidden = teacher_hidden.contiguous()
@@ -697,17 +704,15 @@ class SeparateFullCEFunction(torch.autograd.Function):
 
         # ── Allocate saved gradients ────────────────────────────────────────
         compute_grad = (
-            student_hidden.requires_grad
-            or teacher_hidden.requires_grad
-            or weight.requires_grad
-            or teacher_weight.requires_grad
+            need_grad_student_hidden
+            or need_grad_teacher_hidden
+            or need_grad_weight
+            or need_grad_teacher_weight
         )
-        grad_student_hidden = torch.zeros_like(student_hidden) if student_hidden.requires_grad else None
-        grad_teacher_hidden = torch.zeros_like(teacher_hidden) if teacher_hidden.requires_grad else None
+        grad_student_hidden = torch.zeros_like(student_hidden) if need_grad_student_hidden else None
+        grad_teacher_hidden = torch.zeros_like(teacher_hidden) if need_grad_teacher_hidden else None
         grad_weight = None
-        need_grad_weight = weight.requires_grad
         grad_teacher_weight = None
-        need_grad_teacher_weight = teacher_weight.requires_grad
 
         # ── Resolve chunking and accumulators ───────────────────────────────
         chunk_size_actual, num_chunks = resolve_chunk_size(BT, chunk_size, V=V, max_chunks=max_chunks)

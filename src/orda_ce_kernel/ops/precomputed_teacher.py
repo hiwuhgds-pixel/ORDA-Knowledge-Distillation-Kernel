@@ -240,6 +240,9 @@ class PrecomputedCEFunction(torch.autograd.Function):
         V = weight.shape[0]
         device = student_hidden.device
 
+        need_grad_student_hidden = student_hidden.requires_grad
+        need_grad_weight = weight.requires_grad
+
         # ── Normalize inputs and compute dtype ──────────────────────────────
         student_hidden = student_hidden.contiguous()
         weight = weight.contiguous()
@@ -274,10 +277,9 @@ class PrecomputedCEFunction(torch.autograd.Function):
         student_hidden_c = student_hidden if student_hidden.dtype == compute_dtype else student_hidden.to(compute_dtype)
 
         # ── Allocate saved gradients ────────────────────────────────────────
-        compute_grad = student_hidden.requires_grad or weight.requires_grad
-        grad_student_hidden = torch.zeros_like(student_hidden) if student_hidden.requires_grad else None
+        compute_grad = need_grad_student_hidden or need_grad_weight
+        grad_student_hidden = torch.zeros_like(student_hidden) if need_grad_student_hidden else None
         grad_weight = None
-        need_grad_weight = weight.requires_grad
 
         # ── Resolve chunking and accumulators ───────────────────────────────
         chunk_size_actual, num_chunks = resolve_chunk_size(BT, chunk_size, V=V, max_chunks=max_chunks)
