@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.13, pytest-8.4.2, pluggy-1.6.0
+rootdir: /content
+configfile: pyproject.toml
+plugins: typeguard-4.5.2, langsmith-0.9.1, anyio-4.14.0
+collected 94 items
+
+test/unit/test_autotune.py .......                                       [  7%]
+test/unit/test_dispatcher.py ........                                    [ 15%]
+test/unit/test_env.py ............                                       [ 28%]
+test/unit/test_no_config_dependency.py ..                                [ 30%]
+test/unit/test_public_api.py ..............                              [ 45%]
+test/unit/test_resolver.py .............                                 [ 59%]
+test/correctness/test_public_api_cuda.py ............................... [ 92%]
+                                                                         [ 92%]
+test/correctness/test_torch_backend_cpu.py .......                       [100%]
+
+============================= 94 passed in 19.87s ==============================

@@ -1,0 +1,58 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: loss accuracy CE
+────────────────────────────────────────────────────────
+ device    : cuda
+ gpu       : Tesla T4
+ dtype     : torch.float16 (amp, gradscale)
+ baseline  : fp32
+ component : ce
+ backends  : torch-compile, orda
+ chunk     : dynamic
+ configs   : 32x256, 16x512, 8x1024
+ vocab     : 32768
+ dim       : 1024
+ T         : 1.7
+
+
+ loss
+ config                                 | mode               | fp32         | torch-compile | tc_abs_err   | tc_rel_err   | orda         | orda_abs_err | orda_rel_err
+ ---------------------------------------|--------------------|--------------|---------------|--------------|--------------|--------------|--------------|-------------
+ vocab=32k  seq=256  batch=32  dim=1024 | tied               | 2.089134e+01 |  2.089134e+01 | 1.907349e-06 | 9.129852e-08 | 2.089134e+01 |            0 |            0
+ vocab=32k  seq=256  batch=32  dim=1024 | separate-student   | 1.045459e+01 |  1.045459e+01 |            0 |            0 | 1.045459e+01 |            0 |            0
+ vocab=32k  seq=256  batch=32  dim=1024 | separate-full      | 2.089922e+01 |  2.089922e+01 | 3.814697e-06 | 1.825282e-07 | 2.089922e+01 | 3.814697e-06 | 1.825282e-07
+ vocab=32k  seq=256  batch=32  dim=1024 | precomputed-logits | 1.045214e+01 |  1.045214e+01 |            0 |            0 | 1.045214e+01 |            0 |            0
+ vocab=32k  seq=256  batch=32  dim=1024 | precomputed-hidden | 1.044934e+01 |  1.044934e+01 | 9.536743e-07 | 9.126647e-08 | 1.044934e+01 | 9.536743e-07 | 9.126647e-08
+ vocab=32k  seq=512  batch=16  dim=1024 | tied               | 2.089925e+01 |  2.089925e+01 |            0 |            0 | 2.089925e+01 |            0 |            0
+ vocab=32k  seq=512  batch=16  dim=1024 | separate-student   | 1.045002e+01 |  1.045002e+01 | 1.907349e-06 | 1.825211e-07 | 1.045002e+01 | 1.907349e-06 | 1.825211e-07
+ vocab=32k  seq=512  batch=16  dim=1024 | separate-full      | 2.089136e+01 |  2.089136e+01 |            0 |            0 | 2.089136e+01 |            0 |            0
+ vocab=32k  seq=512  batch=16  dim=1024 | precomputed-logits | 1.045408e+01 |  1.045408e+01 | 1.907349e-06 | 1.824501e-07 | 1.045408e+01 | 9.536743e-07 | 9.122505e-08
+ vocab=32k  seq=512  batch=16  dim=1024 | precomputed-hidden | 1.044183e+01 |  1.044182e+01 | 4.768372e-06 | 4.566607e-07 | 1.044182e+01 | 4.768372e-06 | 4.566607e-07
+ vocab=32k  seq=1024  batch=8  dim=1024 | tied               | 2.089820e+01 |  2.089820e+01 | 5.722046e-06 | 2.738056e-07 | 2.089820e+01 | 7.629395e-06 | 3.650742e-07
+ vocab=32k  seq=1024  batch=8  dim=1024 | separate-student   | 1.045234e+01 |  1.045234e+01 | 9.536743e-07 | 9.124025e-08 | 1.045234e+01 | 9.536743e-07 | 9.124025e-08
+ vocab=32k  seq=1024  batch=8  dim=1024 | separate-full      | 2.089261e+01 |  2.089261e+01 | 1.907349e-06 | 9.129299e-08 | 2.089260e+01 | 3.814697e-06 | 1.825860e-07
+ vocab=32k  seq=1024  batch=8  dim=1024 | precomputed-logits | 1.044347e+01 |  1.044347e+01 | 9.536743e-07 | 9.131773e-08 | 1.044347e+01 |            0 |            0
+ vocab=32k  seq=1024  batch=8  dim=1024 | precomputed-hidden | 1.044664e+01 |  1.044664e+01 |            0 |            0 | 1.044664e+01 |            0 |            0
+
+ grad student_hidden
+ config                                 | mode               | tc_grad_cos | tc_grad_mean | tc_grad_max  | orda_grad_cos | orda_grad_mean | orda_grad_max
+ ---------------------------------------|--------------------|-------------|--------------|--------------|---------------|----------------|--------------
+ vocab=32k  seq=256  batch=32  dim=1024 | tied               |  1.00056839 | 3.018871e-09 | 5.216134e-08 |    1.00057113 |   3.878030e-09 |  8.054485e-08
+ vocab=32k  seq=256  batch=32  dim=1024 | separate-student   |  1.00057220 | 3.025049e-09 | 5.744005e-08 |    1.00057125 |   3.882090e-09 |  9.075666e-08
+ vocab=32k  seq=256  batch=32  dim=1024 | separate-full      |  1.00057280 | 3.023493e-09 | 5.954644e-08 |    1.00057292 |   3.880368e-09 |  9.561336e-08
+ vocab=32k  seq=256  batch=32  dim=1024 | precomputed-logits |  1.00058579 | 3.020066e-09 | 5.347101e-08 |    1.00058603 |   3.871676e-09 |  8.245115e-08
+ vocab=32k  seq=256  batch=32  dim=1024 | precomputed-hidden |  1.00056911 | 3.023945e-09 | 5.663605e-08 |    1.00056767 |   3.877586e-09 |  8.155985e-08
+ vocab=32k  seq=512  batch=16  dim=1024 | tied               |  1.00057554 | 3.023555e-09 | 5.342372e-08 |    1.00057638 |   3.878538e-09 |  8.663119e-08
+ vocab=32k  seq=512  batch=16  dim=1024 | separate-student   |  1.00056458 | 3.025082e-09 | 5.644688e-08 |    1.00056577 |   3.879300e-09 |  8.887946e-08
+ vocab=32k  seq=512  batch=16  dim=1024 | separate-full      |  1.00056815 | 3.020983e-09 | 5.630500e-08 |    1.00056958 |   3.878922e-09 |  1.026929e-07
+ vocab=32k  seq=512  batch=16  dim=1024 | precomputed-logits |  1.00057185 | 3.023305e-09 | 5.404581e-08 |    1.00057197 |   3.877617e-09 |  8.708594e-08
+ vocab=32k  seq=512  batch=16  dim=1024 | precomputed-hidden |  1.00057769 | 3.020660e-09 | 6.977643e-08 |    1.00057888 |   3.876147e-09 |  7.812559e-08
+ vocab=32k  seq=1024  batch=8  dim=1024 | tied               |  1.00056839 | 3.026443e-09 | 5.962647e-08 |    1.00056839 |   3.892995e-09 |  8.925781e-08
+ vocab=32k  seq=1024  batch=8  dim=1024 | separate-student   |  1.00057840 | 3.020492e-09 | 5.694892e-08 |    1.00057840 |   3.870550e-09 |  8.841380e-08
+ vocab=32k  seq=1024  batch=8  dim=1024 | separate-full      |  1.00056887 | 3.022295e-09 | 5.303809e-08 |    1.00056958 |   3.879320e-09 |  1.059161e-07
+ vocab=32k  seq=1024  batch=8  dim=1024 | precomputed-logits |  1.00057137 | 3.023744e-09 | 6.202026e-08 |    1.00057280 |   3.873200e-09 |  8.566349e-08
+ vocab=32k  seq=1024  batch=8  dim=1024 | precomputed-hidden |  1.00057244 | 3.024252e-09 | 5.766924e-08 |    1.00057042 |   3.883851e-09 |  8.406641e-08
+
+torch-compile max abs_err: 5.722046e-06
+torch-compile max rel_err: 4.566607e-07
+orda max abs_err: 7.629395e-06
+orda max rel_err: 4.566607e-07

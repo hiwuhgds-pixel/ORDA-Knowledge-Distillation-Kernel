@@ -1,0 +1,39 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: VRAM backend · TiedTeacher
+────────────────────────────────────────────────────────
+ device     : cuda
+ gpu        : Tesla T4
+ dtype      : torch.float16
+ batch      : 16   T: 3.0
+ num_chunks : 16
+
+
+── dim=512 ─────────────────────────────────────────────
+config                 torch     torch-compile     orda     deltaTorch  deltaCompile
+vocab=16k  seq=256   1152.0 MB     384.1 MB      53.3 MB      -95.4%       -86.1%   
+vocab=16k  seq=512   2304.0 MB     768.3 MB      90.6 MB      -96.1%       -88.2%   
+vocab=16k  seq=1024  4608.0 MB     1536.5 MB     165.2 MB     -96.4%       -89.2%   
+vocab=16k  seq=2048  9216.0 MB     3073.0 MB     314.4 MB     -96.6%       -89.8%   
+vocab=32k  seq=256   2304.0 MB     768.1 MB      101.3 MB     -95.6%       -86.8%   
+vocab=32k  seq=512   4608.0 MB     1536.3 MB     170.6 MB     -96.3%       -88.9%   
+vocab=32k  seq=1024  9216.0 MB     3072.5 MB     309.2 MB     -96.6%       -89.9%   
+vocab=32k  seq=2048     OOM        6145.0 MB     586.4 MB       NA         -90.5%   
+vocab=64k  seq=256   4608.0 MB     1536.1 MB     197.3 MB     -95.7%       -87.2%   
+vocab=64k  seq=512   9216.0 MB     3072.3 MB     330.6 MB     -96.4%       -89.2%   
+vocab=64k  seq=1024     OOM        6144.5 MB     597.2 MB       NA         -90.3%   
+vocab=64k  seq=2048     OOM       12289.1 MB    1130.4 MB       NA         -90.8%   
+
+── dim=1024 ────────────────────────────────────────────
+config                 torch     torch-compile     orda     deltaTorch  deltaCompile
+vocab=16k  seq=256   1152.0 MB     384.1 MB      80.0 MB      -93.1%       -79.2%   
+vocab=16k  seq=512   2304.0 MB     768.3 MB      117.1 MB     -94.9%       -84.8%   
+vocab=16k  seq=1024  4608.0 MB     1536.5 MB     202.2 MB     -95.6%       -86.8%   
+vocab=16k  seq=2048  9216.0 MB     3073.0 MB     372.4 MB     -96.0%       -87.9%   
+vocab=32k  seq=256   2304.0 MB     768.1 MB      144.0 MB     -93.7%       -81.3%   
+vocab=32k  seq=512   4608.0 MB     1536.3 MB     213.1 MB     -95.4%       -86.1%   
+vocab=32k  seq=1024  9216.0 MB     3072.5 MB     362.2 MB     -96.1%       -88.2%   
+vocab=32k  seq=2048     OOM        6145.0 MB     660.4 MB       NA         -89.3%   
+vocab=64k  seq=256   4608.0 MB     1536.1 MB     272.0 MB     -94.1%       -82.3%   
+vocab=64k  seq=512   9216.0 MB     3072.3 MB     405.1 MB     -95.6%       -86.8%   
+vocab=64k  seq=1024     OOM        6144.5 MB     682.2 MB       NA         -88.9%   
+vocab=64k  seq=2048     OOM       12289.1 MB    1236.4 MB       NA         -89.9%   
