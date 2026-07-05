@@ -1,3 +1,5 @@
+import threading
+
 import torch
 
 from .resolver import DEFAULT_MAX_FUSED_SIZE
@@ -9,8 +11,15 @@ def _chunk_size_from_num_chunks(BT: int, num_chunks: int) -> int:
 
 
 def _is_oom_error(exc) -> bool:
-    return isinstance(exc, getattr(torch.cuda, "OutOfMemoryError", ())) or (
-        "out of memory" in str(exc).lower()
+    cuda_oom = getattr(torch.cuda, "OutOfMemoryError", None)
+    if cuda_oom is not None and isinstance(exc, cuda_oom):
+        return True
+    msg = str(exc).lower()
+    return (
+        "cuda out of memory" in msg
+        or "cuda error: out of memory" in msg
+        or "hip out of memory" in msg
+        or "hip error: out of memory" in msg
     )
 
 
@@ -33,6 +42,7 @@ def _cache_key(
     teacher_hidden: torch.Tensor | None = None,
     teacher_weight: torch.Tensor | None = None,
     logits_teacher: torch.Tensor | None = None,
+    compute_kl: bool = True,
 ):
     device = student_hidden.device
     return (
@@ -46,22 +56,27 @@ def _cache_key(
         teacher_mode,
         int(max_fused_size),
         max_chunks,
+        bool(compute_kl),
         _tensor_sig(teacher_hidden),
         _tensor_sig(teacher_weight),
         _tensor_sig(logits_teacher),
     )
 
 
+_CACHE_LOCK = threading.Lock()
+_MAX_CHUNK_CACHE_SIZE = 1024
 _cached_num_chunks: dict = {}
 
 
 # ── Chunk cache API ──────────────────────────────────────────────────────────
 def clear_chunk_cache():
-    _cached_num_chunks.clear()
+    with _CACHE_LOCK:
+        _cached_num_chunks.clear()
 
 
 def get_chunk_cache() -> dict:
-    return dict(_cached_num_chunks)
+    with _CACHE_LOCK:
+        return dict(_cached_num_chunks)
 
 
 # ── Kernel dispatch ──────────────────────────────────────────────────────────
@@ -219,8 +234,11 @@ def dynamic_chunk(
         teacher_hidden,
         teacher_weight,
         logits_teacher,
+        compute_kl=float(kl_weight) != 0.0,
     )
-    num_chunks = max(_cached_num_chunks.get(key, dynamic_num_chunks), dynamic_num_chunks)
+    with _CACHE_LOCK:
+        cached_num_chunks = _cached_num_chunks.get(key)
+    num_chunks = max(cached_num_chunks or dynamic_num_chunks, dynamic_num_chunks)
     num_chunks = min(num_chunks, BT, max_chunks_limit)
 
     while True:
@@ -249,7 +267,10 @@ def dynamic_chunk(
                 teacher_ce_weight=teacher_ce_weight,
                 validate_labels=validate_labels,
             )
-            _cached_num_chunks[key] = num_chunks
+            with _CACHE_LOCK:
+                if key not in _cached_num_chunks and len(_cached_num_chunks) >= _MAX_CHUNK_CACHE_SIZE:
+                    _cached_num_chunks.clear()
+                _cached_num_chunks[key] = num_chunks
             return result
         except Exception as exc:
             if not _is_oom_error(exc):

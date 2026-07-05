@@ -11,7 +11,7 @@ from typing import Callable, Iterable, NamedTuple
 import torch
 
 
-AUTOTUNE_VERSION = 2
+AUTOTUNE_VERSION = 3
 AUTOTUNE_WARMUP_MS = int(os.environ.get("ORDA_AUTOTUNE_WARMUP_MS", "25"))
 AUTOTUNE_REP_MS = int(os.environ.get("ORDA_AUTOTUNE_REP_MS", "100"))
 
@@ -201,6 +201,9 @@ def _cache_key(
     n_rows: int,
     max_fused_size: int,
     shape_key: Iterable[int],
+    compute_kl: bool = True,
+    t_is_one: bool = False,
+    compute_teacher_ce: bool = True,
 ) -> str:
     payload = {
         "version": AUTOTUNE_VERSION,
@@ -211,14 +214,24 @@ def _cache_key(
         "n_rows": int(n_rows),
         "max_fused_size": int(max_fused_size),
         "shape_key": [int(item) for item in shape_key],
+        "compute_kl": bool(compute_kl),
+        "t_is_one": bool(t_is_one),
+        "compute_teacher_ce": bool(compute_teacher_ce),
     }
     return json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
 
 # ── Benchmark runner ─────────────────────────────────────────────────────────
 def _is_oom_error(exc: BaseException) -> bool:
-    return isinstance(exc, getattr(torch.cuda, "OutOfMemoryError", ())) or (
-        "out of memory" in str(exc).lower()
+    cuda_oom = getattr(torch.cuda, "OutOfMemoryError", None)
+    if cuda_oom is not None and isinstance(exc, cuda_oom):
+        return True
+    msg = str(exc).lower()
+    return (
+        "cuda out of memory" in msg
+        or "cuda error: out of memory" in msg
+        or "hip out of memory" in msg
+        or "hip error: out of memory" in msg
     )
 
 
@@ -250,6 +263,9 @@ def select_config(
     shape_key: Iterable[int],
     autotune: bool,
     bench_fn: Callable[[int, int], object] | None = None,
+    compute_kl: bool = True,
+    t_is_one: bool = False,
+    compute_teacher_ce: bool = True,
 ) -> LaunchConfig:
     fallback = default_config(mode, vocab_size, max_fused_size)
     if not autotune:
@@ -265,6 +281,9 @@ def select_config(
         n_rows=n_rows,
         max_fused_size=max_fused_size,
         shape_key=shape_key,
+        compute_kl=compute_kl,
+        t_is_one=t_is_one,
+        compute_teacher_ce=compute_teacher_ce,
     )
 
     with _LOCK:

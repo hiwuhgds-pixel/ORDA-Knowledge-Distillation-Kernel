@@ -55,14 +55,14 @@ class PrecomputedTeacher:
 # ── Public config and output types ───────────────────────────────────────────
 @dataclass(frozen=True)
 class KernelConfig:
-    fp32_grad_weight_accumulation: bool = False
+    fp32_grad_weight_accumulation: bool | None = None
     chunk_size: int | Literal["auto", "dynamic"] | None = None
     num_chunks: int | None = None
     max_chunks: int | None = None
-    max_fused_size: int = DEFAULT_MAX_FUSED_SIZE
+    max_fused_size: int | None = None
     kl_weight: float | None = None
     kl_temperature: float | None = None
-    autotune: bool = False
+    autotune: bool | None = None
 
     @property
     def effective_fp32_grad_weight_accumulation(self) -> bool:
@@ -79,14 +79,38 @@ class DistillationLossOutput(NamedTuple):
 # ── Config resolution ────────────────────────────────────────────────────────
 def _resolve_profile(profile: Profile) -> KernelConfig:
     if profile == "balanced":
-        return KernelConfig()
+        return KernelConfig(
+            fp32_grad_weight_accumulation=False,
+            max_fused_size=DEFAULT_MAX_FUSED_SIZE,
+            autotune=False,
+        )
     if profile == "debug":
-        return KernelConfig(fp32_grad_weight_accumulation=True)
+        return KernelConfig(
+            fp32_grad_weight_accumulation=True,
+            max_fused_size=DEFAULT_MAX_FUSED_SIZE,
+            autotune=False,
+        )
     raise ValueError(f"profile must be 'balanced' or 'debug', got {profile!r}")
 
 
 def _resolve_config(profile: Profile, config: KernelConfig | None) -> KernelConfig:
-    return config if config is not None else _resolve_profile(profile)
+    profile_config = _resolve_profile(profile)
+    if config is None:
+        return profile_config
+    return KernelConfig(
+        fp32_grad_weight_accumulation=(
+            profile_config.fp32_grad_weight_accumulation
+            if config.fp32_grad_weight_accumulation is None
+            else config.fp32_grad_weight_accumulation
+        ),
+        chunk_size=profile_config.chunk_size if config.chunk_size is None else config.chunk_size,
+        num_chunks=profile_config.num_chunks if config.num_chunks is None else config.num_chunks,
+        max_chunks=profile_config.max_chunks if config.max_chunks is None else config.max_chunks,
+        max_fused_size=profile_config.max_fused_size if config.max_fused_size is None else config.max_fused_size,
+        kl_weight=profile_config.kl_weight if config.kl_weight is None else config.kl_weight,
+        kl_temperature=profile_config.kl_temperature if config.kl_temperature is None else config.kl_temperature,
+        autotune=profile_config.autotune if config.autotune is None else config.autotune,
+    )
 
 
 def _resolve_kl_config(
@@ -288,12 +312,13 @@ def _torch_reference(
         reduction="none",
     )
     mask = labels != ignore_index
-    denom = max(int(mask.sum().item()), 1)
+    denom = torch.clamp(mask.sum(), min=1)
 
     t = float(kl_temperature)
     log_p_s = F.log_softmax(logits_s / t, dim=-1)
-    p_t = F.softmax(logits_t.detach() / t, dim=-1)
-    kl_all = F.kl_div(log_p_s, p_t, reduction="none").sum(dim=-1) * (t * t)
+    log_p_t = F.log_softmax(logits_t.detach() / t, dim=-1)
+    p_t = log_p_t.exp()
+    kl_all = (p_t * (log_p_t - log_p_s)).sum(dim=-1) * (t * t)
     kl_all = kl_all.masked_fill(~mask, 0.0)
 
     if reduction == "mean":

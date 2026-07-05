@@ -1,4 +1,5 @@
 import torch
+from torch.autograd.function import once_differentiable
 
 from .._runtime import HAS_TRITON, default_compute_dtype, tl, tl_highprec_exp, tl_highprec_log, triton
 from ..utils._autotune import PRECOMPUTED, default_config, select_config
@@ -21,88 +22,117 @@ if HAS_TRITON:
         T_inv,
         kl_grad_scale,
         T_sq,
+        COMPUTE_KL: tl.constexpr,
+        T_IS_ONE: tl.constexpr,
+        VALIDATE_LABELS: tl.constexpr,
         BLOCK_SIZE: tl.constexpr,
     ):
         """Forward losses and in-place student dlogits for precomputed teacher."""
         i = tl.program_id(0).to(tl.int64)
         y = tl.load(Y_ptr + i * Y_stride)
 
-        tl.device_assert(
-            ((y >= 0) & (y < n_cols)) | (y == ignore_index),
-            "labels out of range",
-        )
+        if VALIDATE_LABELS:
+            tl.device_assert(
+                ((y >= 0) & (y < n_cols)) | (y == ignore_index),
+                "labels out of range",
+            )
+        in_range = (y >= 0) & (y < n_cols)
         ignored = y == ignore_index
-        y_safe = tl.where(ignored, 0, y)
+        y_safe = tl.where(ignored | (~in_range), 0, y)
 
         row_s = S_ptr + i * S_stride
         row_t = T_ptr + i * T_stride
         offs = tl.arange(0, BLOCK_SIZE)
 
+        student_row_scale = tl.where(ignored, 0.0, student_scale)
+
         m_s = float("-inf")
         d_s_ce = 0.0
-        d_s_kl = 0.0
-        m_t_kl = float("-inf")
-        d_t_kl = 0.0
+        if COMPUTE_KL and not T_IS_ONE:
+            d_s_kl = 0.0
+        if COMPUTE_KL:
+            m_t_kl = float("-inf")
+            d_t_kl = 0.0
 
         for start in range(0, n_cols, BLOCK_SIZE):
             cols = start + offs
             mask = cols < n_cols
             x_s = tl.load(row_s + cols, mask=mask, other=float("-inf"), eviction_policy="evict_last").to(tl.float32)
-            x_t = tl.load(row_t + cols, mask=mask, other=float("-inf"), eviction_policy="evict_last").to(tl.float32)
-            x_t_kl = x_t * T_inv
+            if COMPUTE_KL:
+                x_t = tl.load(row_t + cols, mask=mask, other=float("-inf"), eviction_policy="evict_last").to(tl.float32)
 
             m_s_new = tl.maximum(m_s, tl.max(x_s))
-            m_t_kl_new = tl.maximum(m_t_kl, tl.max(x_t_kl))
-
             d_s_ce = (
                 d_s_ce * tl_highprec_exp(m_s - m_s_new)
                 + tl.sum(tl_highprec_exp(x_s - m_s_new))
             )
-            d_s_kl = (
-                d_s_kl * tl_highprec_exp(T_inv * (m_s - m_s_new))
-                + tl.sum(tl_highprec_exp((x_s - m_s_new) * T_inv))
-            )
-            d_t_kl = (
-                d_t_kl * tl_highprec_exp(m_t_kl - m_t_kl_new)
-                + tl.sum(tl_highprec_exp(x_t_kl - m_t_kl_new))
-            )
+            if COMPUTE_KL and not T_IS_ONE:
+                d_s_kl = (
+                    d_s_kl * tl_highprec_exp(T_inv * (m_s - m_s_new))
+                    + tl.sum(tl_highprec_exp((x_s - m_s_new) * T_inv))
+                )
+
+            if COMPUTE_KL:
+                if T_IS_ONE:
+                    m_t_kl_new = tl.maximum(m_t_kl, tl.max(x_t))
+                    d_t_kl = (
+                        d_t_kl * tl_highprec_exp(m_t_kl - m_t_kl_new)
+                        + tl.sum(tl_highprec_exp(x_t - m_t_kl_new))
+                    )
+                else:
+                    x_t_kl = x_t * T_inv
+                    m_t_kl_new = tl.maximum(m_t_kl, tl.max(x_t_kl))
+                    d_t_kl = (
+                        d_t_kl * tl_highprec_exp(m_t_kl - m_t_kl_new)
+                        + tl.sum(tl_highprec_exp(x_t_kl - m_t_kl_new))
+                    )
+                m_t_kl = m_t_kl_new
 
             m_s = m_s_new
-            m_t_kl = m_t_kl_new
 
-        m_s_kl = m_s * T_inv
         log_d_s_ce = tl_highprec_log(d_s_ce)
-        log_d_s_kl = tl_highprec_log(d_s_kl)
-        log_d_t_kl = tl_highprec_log(d_t_kl)
         lse_s_ce = m_s + log_d_s_ce
         logit_label_s = tl.load(row_s + y_safe).to(tl.float32)
         tl.store(L_ptr + i, tl.where(ignored, 0.0, lse_s_ce - logit_label_s))
 
-        kl_row = 0.0
-        student_row_scale = tl.where(ignored, 0.0, student_scale)
+        if COMPUTE_KL:
+            if T_IS_ONE:
+                m_s_kl = m_s
+                log_d_s_kl = log_d_s_ce
+            else:
+                m_s_kl = m_s * T_inv
+                log_d_s_kl = tl_highprec_log(d_s_kl)
+            log_d_t_kl = tl_highprec_log(d_t_kl)
 
+        kl_row = 0.0
         for start in range(0, n_cols, BLOCK_SIZE):
             cols = start + offs
             mask = cols < n_cols
             is_label = cols == y_safe
 
             x_s = tl.load(row_s + cols, mask=mask, other=float("-inf"), eviction_policy="evict_first").to(tl.float32)
-            x_t = tl.load(row_t + cols, mask=mask, other=float("-inf"), eviction_policy="evict_first").to(tl.float32)
-
-            v_t_kl = x_t * T_inv - m_t_kl
-            log_p_t = v_t_kl - log_d_t_kl
-            p_t_kl = tl_highprec_exp(log_p_t)
-
-            v_s_kl = x_s * T_inv - m_s_kl
-            log_p_s = v_s_kl - log_d_s_kl
-            p_s_kl = tl_highprec_exp(log_p_s)
-            kl_row += tl.sum(tl.where(mask, p_t_kl * (log_p_t - log_p_s), 0.0))
-
-            student_grad = tl_highprec_exp(x_s - m_s) / d_s_ce
+            student_prob_ce = tl_highprec_exp(x_s - m_s) / d_s_ce
+            student_grad = student_prob_ce
             student_grad = tl.where(is_label, student_grad - 1.0, student_grad)
             student_grad = student_grad * student_row_scale
 
-            grad_s = student_grad + kl_grad_scale * (p_s_kl - p_t_kl)
+            grad_s = student_grad
+            if COMPUTE_KL:
+                x_t = tl.load(row_t + cols, mask=mask, other=float("-inf"), eviction_policy="evict_first").to(tl.float32)
+                if T_IS_ONE:
+                    p_s_kl = student_prob_ce
+                    log_p_s = x_s - m_s_kl - log_d_s_kl
+                    log_p_t = x_t - m_t_kl - log_d_t_kl
+                    p_t_kl = tl_highprec_exp(log_p_t)
+                else:
+                    log_p_s = x_s * T_inv - m_s_kl - log_d_s_kl
+                    p_s_kl = tl_highprec_exp(log_p_s)
+                    log_p_t = x_t * T_inv - m_t_kl - log_d_t_kl
+                    p_t_kl = tl_highprec_exp(log_p_t)
+
+                kl_row += tl.sum(tl.where(mask, p_t_kl * (log_p_t - log_p_s), 0.0))
+                grad_s = student_grad + kl_grad_scale * (p_s_kl - p_t_kl)
+
             grad_s = tl.where(ignored, 0.0, grad_s)
             tl.store(row_s + cols, grad_s, mask=mask)
 
@@ -130,6 +160,7 @@ def _precomputed_student_fwdbwd(
     max_fused_size: int = DEFAULT_MAX_FUSED_SIZE,
     block_size: int | None = None,
     num_warps: int | None = None,
+    validate_labels: bool = True,
 ) -> None:
     """Forward + in-place student backward for precomputed teacher distillation."""
     if not HAS_TRITON:
@@ -177,6 +208,8 @@ def _precomputed_student_fwdbwd(
         launch_config = default_config(PRECOMPUTED, vocab_size, int(max_fused_size))
         block_size = launch_config.block_size
         num_warps = launch_config.num_warps
+    compute_kl = float(kl_weight) != 0.0
+    t_is_one = float(kl_temperature) == 1.0
 
     _precomputed_student_ce_kl_fwdbwd_kernel[(n_rows,)](
         logits_student_chunk,
@@ -194,6 +227,9 @@ def _precomputed_student_fwdbwd(
         T_inv=1.0 / float(kl_temperature),
         kl_grad_scale=float(kl_weight) * float(kl_temperature),
         T_sq=float(kl_temperature) * float(kl_temperature),
+        COMPUTE_KL=compute_kl,
+        T_IS_ONE=t_is_one,
+        VALIDATE_LABELS=bool(validate_labels),
         BLOCK_SIZE=int(block_size),
         num_warps=int(num_warps),
     )
@@ -221,6 +257,7 @@ class PrecomputedCEFunction(torch.autograd.Function):
         autotune=False,
         teacher_hidden=None,
         teacher_weight=None,
+        validate_labels=True,
     ):
         # ── Validate mode constraints ────────────────────────────────────────
         if float(teacher_ce_weight) != 0.0:
@@ -250,23 +287,28 @@ class PrecomputedCEFunction(torch.autograd.Function):
             raise ValueError(f"labels must have dtype torch.long, got {labels.dtype}")
         labels = labels.contiguous()
 
+        compute_kl = float(kl_weight) != 0.0
         has_hidden_weight = teacher_hidden is not None and teacher_weight is not None
         if logits_teacher is not None:
-            logits_teacher = logits_teacher.contiguous()
-            compute_dtype = default_compute_dtype(weight, student_hidden, logits_teacher)
-            logits_teacher_c = (
-                logits_teacher if logits_teacher.dtype == compute_dtype else logits_teacher.to(compute_dtype)
+            compute_dtype = (
+                default_compute_dtype(weight, student_hidden, logits_teacher)
+                if compute_kl
+                else default_compute_dtype(weight, student_hidden)
             )
+            logits_teacher_c = logits_teacher
             teacher_hidden_c = None
             weight_t_cast = None
         elif has_hidden_weight:
-            teacher_hidden = teacher_hidden.contiguous()
-            teacher_weight = teacher_weight.contiguous()
-            compute_dtype = default_compute_dtype(weight, student_hidden, teacher_hidden)
-            teacher_hidden_c = (
-                teacher_hidden if teacher_hidden.dtype == compute_dtype else teacher_hidden.to(compute_dtype)
+            if compute_kl:
+                teacher_hidden = teacher_hidden.contiguous()
+                teacher_weight = teacher_weight.contiguous()
+            compute_dtype = (
+                default_compute_dtype(weight, student_hidden, teacher_hidden)
+                if compute_kl
+                else default_compute_dtype(weight, student_hidden)
             )
-            weight_t_cast = teacher_weight.to(compute_dtype)
+            teacher_hidden_c = None
+            weight_t_cast = None
             logits_teacher_c = None
         else:
             raise ValueError(
@@ -278,23 +320,40 @@ class PrecomputedCEFunction(torch.autograd.Function):
 
         # ── Allocate saved gradients ────────────────────────────────────────
         compute_grad = need_grad_student_hidden or need_grad_weight
-        grad_student_hidden = torch.zeros_like(student_hidden) if need_grad_student_hidden else None
+        grad_student_hidden = torch.empty_like(student_hidden) if need_grad_student_hidden else None
         grad_weight = None
 
         # ── Resolve chunking and accumulators ───────────────────────────────
         chunk_size_actual, num_chunks = resolve_chunk_size(BT, chunk_size, V=V, max_chunks=max_chunks)
         actual_use_fp32_accum = False if use_fp32_accum is None else bool(use_fp32_accum)
 
-        loss_student_accum = torch.zeros((), dtype=torch.float32, device=device)
-        kl_accum = torch.zeros((), dtype=torch.float32, device=device)
+        loss_student_buf = torch.empty(BT, dtype=torch.float32, device=device)
+        kl_buf = torch.empty(BT, dtype=torch.float32, device=device)
 
         student_scale = float(student_ce_weight)
+        t_is_one = float(kl_temperature) == 1.0
 
         # ── Resolve teacher chunk strategy ───────────────────────────────────
-        if logits_teacher_c is not None:
-            get_t_chunk = lambda s, e: logits_teacher_c[s:e]
+        logits_t_buffer = None
+        if compute_kl:
+            if logits_teacher_c is not None:
+                if logits_teacher_c.dtype == compute_dtype:
+                    get_t_chunk = lambda s, e: logits_teacher_c[s:e].contiguous()
+                else:
+                    logits_t_buffer = torch.empty((chunk_size_actual, V), dtype=compute_dtype, device=device)
+
+                    def get_t_chunk(s, e):
+                        dst = logits_t_buffer[: e - s]
+                        dst.copy_(logits_teacher_c[s:e])
+                        return dst
+            else:
+                teacher_hidden_c = (
+                    teacher_hidden if teacher_hidden.dtype == compute_dtype else teacher_hidden.to(compute_dtype)
+                )
+                weight_t_cast = teacher_weight.to(compute_dtype)
+                get_t_chunk = lambda s, e: teacher_hidden_c[s:e] @ weight_t_cast.t()
         else:
-            get_t_chunk = lambda s, e: teacher_hidden_c[s:e] @ weight_t_cast.t()
+            get_t_chunk = None
 
         with torch.no_grad():
             for chunk_id in range(num_chunks):
@@ -305,17 +364,19 @@ class PrecomputedCEFunction(torch.autograd.Function):
 
                 student_hidden_chunk = student_hidden_c[start:end]
                 labels_chunk = labels[start:end]
-                logits_t_chunk = get_t_chunk(start, end)
+                logits_t_chunk = get_t_chunk(start, end) if compute_kl else None
                 bench_fn = None
                 if bool(autotune):
                     # ── Autotune trial: fresh GEMM output per config ────────
                     def bench_fn(block_size: int, num_warps: int):
-                        logits_s_bench = student_hidden_chunk @ weight_cast.t()
+                        logits_s_bench = torch.empty((n_rows, V), dtype=compute_dtype, device=device)
+                        torch.mm(student_hidden_chunk, weight_cast.t(), out=logits_s_bench)
+                        logits_t_bench = logits_t_chunk if compute_kl else logits_s_bench
                         student_bench = torch.empty(n_rows, dtype=torch.float32, device=device)
                         kl_bench = torch.empty(n_rows, dtype=torch.float32, device=device)
                         _precomputed_student_fwdbwd(
                             logits_s_bench,
-                            logits_t_chunk,
+                            logits_t_bench,
                             labels_chunk,
                             student_bench,
                             kl_bench,
@@ -327,8 +388,11 @@ class PrecomputedCEFunction(torch.autograd.Function):
                             max_fused_size=max_fused_size,
                             block_size=block_size,
                             num_warps=num_warps,
+                            validate_labels=validate_labels,
                         )
                         outputs = [logits_s_bench]
+                        if compute_kl:
+                            outputs.append(logits_t_bench)
                         if compute_grad:
                             student_logits_grad = logits_s_bench
                             if grad_student_hidden is not None:
@@ -348,17 +412,23 @@ class PrecomputedCEFunction(torch.autograd.Function):
                     shape_key=(student_hidden.shape[1],),
                     autotune=bool(autotune),
                     bench_fn=bench_fn,
+                    compute_kl=compute_kl,
+                    t_is_one=t_is_one,
+                    compute_teacher_ce=False,
                 )
                 logits_s_chunk = student_hidden_chunk @ weight_cast.t()
+                if not compute_kl:
+                    # COMPUTE_KL=False makes the kernel ignore row_t; keep the alias local to this branch.
+                    logits_t_chunk = logits_s_chunk
 
-                student_loss_buf = torch.empty(n_rows, dtype=torch.float32, device=device)
-                kl_buf = torch.empty(n_rows, dtype=torch.float32, device=device)
+                student_loss_chunk = loss_student_buf[start:end]
+                kl_chunk = kl_buf[start:end]
                 _precomputed_student_fwdbwd(
                     logits_s_chunk,
                     logits_t_chunk,
                     labels_chunk,
-                    student_loss_buf,
-                    kl_buf,
+                    student_loss_chunk,
+                    kl_chunk,
                     n_rows=n_rows,
                     kl_weight=kl_weight,
                     kl_temperature=kl_temperature,
@@ -367,10 +437,8 @@ class PrecomputedCEFunction(torch.autograd.Function):
                     max_fused_size=max_fused_size,
                     block_size=launch_config.block_size,
                     num_warps=launch_config.num_warps,
+                    validate_labels=validate_labels,
                 )
-                loss_student_accum = loss_student_accum + student_loss_buf.sum()
-                kl_accum = kl_accum + kl_buf.sum()
-                del student_loss_buf, kl_buf
 
                 # ── Materialize hidden/weight gradients from dlogits ───────
                 if compute_grad:
@@ -391,6 +459,8 @@ class PrecomputedCEFunction(torch.autograd.Function):
                 del logits_s_chunk
 
         # ── Reduce losses ──────────────────────────────────────────────────
+        loss_student_accum = loss_student_buf.sum()
+        kl_accum = kl_buf.sum()
         if reduction == "mean":
             denom = torch.clamp((labels != ignore_index).sum(), min=1)
             mean_scale = denom.to(torch.float32).reciprocal()
@@ -407,6 +477,7 @@ class PrecomputedCEFunction(torch.autograd.Function):
         # ── Save precomputed backward buffers ──────────────────────────────
         ctx.save_for_backward(grad_student_hidden, grad_weight, mean_scale)
         ctx.compute_grad = compute_grad
+        ctx.weight_dtype = weight.dtype
 
         loss_s_out = loss_s.detach()
         loss_t_out = loss_t.detach()
@@ -415,23 +486,25 @@ class PrecomputedCEFunction(torch.autograd.Function):
         return loss, loss_s_out, loss_t_out, kl_loss_out
 
     @staticmethod
+    @once_differentiable
     def backward(ctx, grad_output, _gs=None, _gt=None, _gkl=None):
         grad_student_hidden, grad_weight, mean_scale = ctx.saved_tensors
 
         # ── Scale cached gradients by upstream scalar ──────────────────────
         if grad_output is None or not ctx.compute_grad:
-            return (None,) * 17
+            return (None,) * 18
 
         effective_grad = grad_output * mean_scale
 
         if grad_student_hidden is not None:
             grad_student_hidden = grad_student_hidden * effective_grad
         if grad_weight is not None:
-            grad_weight = grad_weight * effective_grad
+            grad_weight = (grad_weight * effective_grad).to(ctx.weight_dtype)
 
         return (
             grad_student_hidden,
             grad_weight,
+            None,
             None,
             None,
             None,
@@ -574,4 +647,5 @@ def precomputed_distillation_loss(
         autotune,
         teacher_hidden,
         teacher_weight,
+        validate_labels,
     )
