@@ -1,0 +1,125 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: accuracy
+────────────────────────────────────────────────────────
+ device     : cuda
+ gpu        : NVIDIA A100 80GB PCIe
+ dtype      : torch.bfloat16 (amp)
+ baseline   : fp32
+ components : ce, kl
+ case       : precomputed-hidden-dkd
+
+ vocab       : 16384
+ student dim : 1024
+ teacher dim : 2048
+/usr/local/lib/python3.12/site-packages/torch/_inductor/lowering.py:7095: UserWarning: 
+Online softmax is disabled on the fly since Inductor decides to
+split the reduction. Cut an issue to PyTorch if this is an
+important use case and you want to speed it up with online
+softmax.
+
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/torch/_inductor/lowering.py:7095: UserWarning: 
+Online softmax is disabled on the fly since Inductor decides to
+split the reduction. Cut an issue to PyTorch if this is an
+important use case and you want to speed it up with online
+softmax.
+
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/torch/_inductor/lowering.py:7095: UserWarning: 
+Online softmax is disabled on the fly since Inductor decides to
+split the reduction. Cut an issue to PyTorch if this is an
+important use case and you want to speed it up with online
+softmax.
+
+  warnings.warn(
+/usr/local/lib/python3.12/site-packages/torch/_inductor/lowering.py:7095: UserWarning: 
+Online softmax is disabled on the fly since Inductor decides to
+split the reduction. Cut an issue to PyTorch if this is an
+important use case and you want to speed it up with online
+softmax.
+
+  warnings.warn(
+
+── seq=2048  batch=8 ───────────────────────────────────
+
+ CE · loss
+ backend         | value        | abs_err      | rel_err     
+ ────────────────|──────────────|──────────────|─────────────
+ fp32            | 9.905880e+00 |            0 |            0
+ torch           | 9.906013e+00 | 1.335144e-04 | 1.347830e-05
+ torch-compile   | 9.905911e+00 | 3.147125e-05 | 3.177027e-06
+ orda (1 chunk)  | 9.905910e+00 | 3.051758e-05 | 3.080754e-06
+ orda (8 chunk)  | 9.905910e+00 | 3.051758e-05 | 3.080754e-06
+ orda (32 chunk) | 9.905910e+00 | 3.051758e-05 | 3.080754e-06
+
+ CE · grad all active tensors
+ backend         | grad_cos   | grad_mean    | grad_max     | underflow   
+ ────────────────|────────────|──────────────|──────────────|─────────────
+ fp32            | 1.00000000 |            0 |            0 |   0/33546240
+ torch           | 0.99996457 | 1.851527e-07 | 6.871298e-06 |   0/33546240
+ torch-compile   | 0.99996459 | 1.850242e-07 | 6.871298e-06 |   0/33546240
+ orda (1 chunk)  | 0.99996666 | 1.797374e-07 | 6.988223e-06 |   0/33546240
+ orda (8 chunk)  | 0.99996667 | 1.798167e-07 | 6.989474e-06 |   0/33546240
+ orda (32 chunk) | 0.99996667 | 1.798230e-07 | 6.992123e-06 | 181/33546240
+
+ KL · loss
+ backend         | value        | abs_err      | rel_err     
+ ────────────────|──────────────|──────────────|─────────────
+ fp32            | 6.164316e-01 |            0 |            0
+ torch           | 6.164247e-01 | 6.914139e-06 | 1.121639e-05
+ torch-compile   | 6.164249e-01 | 6.675720e-06 | 1.082962e-05
+ orda (1 chunk)  | 6.164249e-01 | 6.675720e-06 | 1.082962e-05
+ orda (8 chunk)  | 6.164249e-01 | 6.675720e-06 | 1.082962e-05
+ orda (32 chunk) | 6.164249e-01 | 6.675720e-06 | 1.082962e-05
+
+ KL · grad all active tensors
+ backend         | grad_cos   | grad_mean    | grad_max     | underflow    
+ ────────────────|────────────|──────────────|──────────────|──────────────
+ fp32            | 1.00000000 |            0 |            0 |    0/33546240
+ torch           | 0.99993991 | 9.152908e-08 | 3.199035e-06 |    0/33546240
+ torch-compile   | 0.99993991 | 9.153136e-08 | 3.199035e-06 |    0/33546240
+ orda (1 chunk)  | 0.99994196 | 9.009540e-08 | 2.929912e-06 |    1/33546240
+ orda (8 chunk)  | 0.99994196 | 9.009500e-08 | 2.930363e-06 |    0/33546240
+ orda (32 chunk) | 0.99994196 | 9.009531e-08 | 2.929766e-06 | 2374/33546240
+
+── seq=520  batch=17 ───────────────────────────────────
+
+ CE · loss
+ backend         | value        | abs_err      | rel_err     
+ ────────────────|──────────────|──────────────|─────────────
+ fp32            | 9.912582e+00 |            0 |            0
+ torch           | 9.912410e+00 | 1.726151e-04 | 1.741373e-05
+ torch-compile   | 9.912610e+00 | 2.765656e-05 | 2.790045e-06
+ orda (1 chunk)  | 9.912610e+00 | 2.765656e-05 | 2.790045e-06
+ orda (8 chunk)  | 9.912610e+00 | 2.765656e-05 | 2.790045e-06
+ orda (32 chunk) | 9.912610e+00 | 2.765656e-05 | 2.790045e-06
+
+ CE · grad all active tensors
+ backend         | grad_cos   | grad_mean    | grad_max     | underflow  
+ ────────────────|────────────|──────────────|──────────────|────────────
+ fp32            | 1.00000000 |            0 |            0 |  0/25821184
+ torch           | 0.99996916 | 2.574287e-07 | 9.341631e-06 |  0/25821184
+ torch-compile   | 0.99996912 | 2.569633e-07 | 9.341631e-06 |  0/25821184
+ orda (1 chunk)  | 0.99997056 | 2.458916e-07 | 7.966912e-06 |  0/25821184
+ orda (8 chunk)  | 0.99997056 | 2.461030e-07 | 7.950133e-06 |  1/25821184
+ orda (32 chunk) | 0.99997056 | 2.459066e-07 | 7.950861e-06 | 64/25821184
+
+ KL · loss
+ backend         | value        | abs_err      | rel_err     
+ ────────────────|──────────────|──────────────|─────────────
+ fp32            | 6.146749e-01 |            0 |            0
+ torch           | 6.146866e-01 | 1.174212e-05 | 1.910297e-05
+ torch-compile   | 6.146861e-01 | 1.126528e-05 | 1.832721e-05
+ orda (1 chunk)  | 6.146861e-01 | 1.120567e-05 | 1.823024e-05
+ orda (8 chunk)  | 6.146861e-01 | 1.120567e-05 | 1.823024e-05
+ orda (32 chunk) | 6.146861e-01 | 1.120567e-05 | 1.823024e-05
+
+ KL · grad all active tensors
+ backend         | grad_cos   | grad_mean    | grad_max     | underflow    
+ ────────────────|────────────|──────────────|──────────────|──────────────
+ fp32            | 1.00000000 |            0 |            0 |    0/25821184
+ torch           | 0.99994561 | 8.023926e-08 | 2.004752e-06 |    0/25821184
+ torch-compile   | 0.99994562 | 8.023367e-08 | 2.004752e-06 |    0/25821184
+ orda (1 chunk)  | 0.99994699 | 7.927445e-08 | 1.841705e-06 |    0/25821184
+ orda (8 chunk)  | 0.99994699 | 7.927677e-08 | 1.841327e-06 |    0/25821184
+ orda (32 chunk) | 0.99994699 | 7.927481e-08 | 1.840897e-06 | 1025/25821184

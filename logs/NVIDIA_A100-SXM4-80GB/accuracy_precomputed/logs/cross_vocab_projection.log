@@ -1,0 +1,12 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: accuracy
+────────────────────────────────────────────────────────
+ device : cuda
+ gpu    : NVIDIA A100 80GB PCIe
+ dtype  : fp64 reference
+ case   : cross_vocab_projection
+
+ check            | shape  | nonfinite_mismatch | max_abs_error         | max_rel_error       
+ ─────────────────|────────|────────────────────|───────────────────────|─────────────────────
+ token_map        |    173 |                  0 |                   0.0 |                  0.0
+ projected_logits | 11x257 |                  0 | 8.881784197001252e-16 | 2.21823536539977e-16

@@ -1,0 +1,28 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: VRAM
+────────────────────────────────────────────────────────
+ device        : cuda
+ gpu           : Tesla T4
+ dtype         : torch.float16
+ batch         : 8   T: 1.0
+ case          : R-Drop · cotrained · cojeffreys
+ kl_divergence : cojeffreys
+
+
+── dim=512 ─────────────────────────────────────────────
+config                 torch     torch-compile     orda     deltaTorch  deltaCompile
+vocab=16k  seq=256    832.0 MB     640.1 MB      52.0 MB      -93.7%       -91.9%   
+vocab=16k  seq=512   1664.0 MB     1280.1 MB     56.0 MB      -96.6%       -95.6%   
+vocab=16k  seq=1024  3328.0 MB     2560.3 MB     65.1 MB      -98.0%       -97.5%   
+vocab=32k  seq=256   1664.0 MB     1280.1 MB     100.0 MB     -94.0%       -92.2%   
+vocab=32k  seq=512   3328.0 MB     2560.1 MB     104.0 MB     -96.9%       -95.9%   
+vocab=32k  seq=1024  6656.0 MB     5120.3 MB     113.1 MB     -98.3%       -97.8%   
+
+── dim=1024 ────────────────────────────────────────────
+config                 torch     torch-compile     orda     deltaTorch  deltaCompile
+vocab=16k  seq=256    832.0 MB     640.1 MB      104.0 MB     -87.5%       -83.8%   
+vocab=16k  seq=512   1664.0 MB     1280.1 MB     112.0 MB     -93.3%       -91.3%   
+vocab=16k  seq=1024  3328.0 MB     2560.3 MB     128.0 MB     -96.2%       -95.0%   
+vocab=32k  seq=256   1664.0 MB     1280.1 MB     200.0 MB     -88.0%       -84.4%   
+vocab=32k  seq=512   3328.0 MB     2560.1 MB     208.0 MB     -93.7%       -91.9%   
+vocab=32k  seq=1024  6656.0 MB     5120.3 MB     224.0 MB     -96.6%       -95.6%   

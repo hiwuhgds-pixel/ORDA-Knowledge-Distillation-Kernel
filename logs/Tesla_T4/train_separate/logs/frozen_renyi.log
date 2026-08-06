@@ -1,0 +1,81 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: train
+────────────────────────────────────────────────────────
+ device        : cuda
+ gpu           : Tesla T4
+ dtype         : torch.float16 (amp, gradscale)
+ batch         : 8   warmup: 5   steps: 50   passes: 2   T: 3.0
+ teacher       : {'dim': 1024, 'q_heads': 8, 'kv_heads': 4, 'n_layers': 8, 'ffn_dim': 2816}
+ student       : {'dim': 512, 'q_heads': 4, 'kv_heads': 2, 'n_layers': 4, 'ffn_dim': 1408}
+ case          : SeparateTeacher frozen · renyi
+ kl_divergence : renyi
+
+
+── vocab=32k  seq=512 ──────────────────────────────────
+  pass 1/2 (↓ top-down)
+    torch-compile     150.15 ms        2160.2 MB
+             orda     148.22 ms        1432.4 MB
+  pass 2/2 (↑ bottom-up)
+             orda     151.65 ms        1432.4 MB
+    torch-compile     161.77 ms        2160.2 MB
+  average
+    torch-compile     155.96 ms        2160.2 MB
+             orda     149.94 ms        1432.4 MB
+  Δ orda vs torch-compile   -6.02 ms (-3.9%)   -727.8 MB (-33.7%)
+
+── vocab=32k  seq=1024 ─────────────────────────────────
+  pass 1/2 (↓ top-down)
+    torch-compile     368.93 ms        3863.6 MB
+             orda     362.90 ms        2148.5 MB
+  pass 2/2 (↑ bottom-up)
+             orda     351.04 ms        2148.5 MB
+    torch-compile     365.55 ms        3863.6 MB
+  average
+    torch-compile     367.24 ms        3863.6 MB
+             orda     356.97 ms        2148.5 MB
+  Δ orda vs torch-compile   -10.27 ms (-2.8%)   -1715.2 MB (-44.4%)
+
+── vocab=64k  seq=512 ──────────────────────────────────
+  pass 1/2 (↓ top-down)
+    torch-compile     203.59 ms        3408.2 MB
+             orda     202.51 ms        1912.4 MB
+  pass 2/2 (↑ bottom-up)
+             orda     202.16 ms        1912.4 MB
+    torch-compile     207.31 ms        3408.2 MB
+  average
+    torch-compile     205.45 ms        3408.2 MB
+             orda     202.34 ms        1912.4 MB
+  Δ orda vs torch-compile   -3.11 ms (-1.5%)   -1495.8 MB (-43.9%)
+
+── vocab=64k  seq=1024 ─────────────────────────────────
+  pass 1/2 (↓ top-down)
+    torch-compile     475.29 ms        6135.6 MB
+             orda     445.22 ms        2628.5 MB
+  pass 2/2 (↑ bottom-up)
+             orda     439.81 ms        2628.5 MB
+    torch-compile     477.92 ms        6135.6 MB
+  average
+    torch-compile     476.61 ms        6135.6 MB
+             orda     442.52 ms        2628.5 MB
+  Δ orda vs torch-compile   -34.09 ms (-7.2%)   -3507.2 MB (-57.2%)
+────────────────────────────────────────────────────────
+ SUMMARY
+────────────────────────────────────────────────────────
+ vocab | seq  | mode          | ms/step | peakVRAM MB
+ ──────|──────|───────────────|─────────|────────────
+   32k |  512 | torch-compile |  155.96 |      2160.2
+   32k |  512 | orda          |  149.94 |      1432.4
+   32k | 1024 | torch-compile |  367.24 |      3863.6
+   32k | 1024 | orda          |  356.97 |      2148.5
+   64k |  512 | torch-compile |  205.45 |      3408.2
+   64k |  512 | orda          |  202.34 |      1912.4
+   64k | 1024 | torch-compile |  476.61 |      6135.6
+   64k | 1024 | orda          |  442.52 |      2628.5
+
+ ORDA vs torch-compile
+ vocab | seq  | Δms    | Δms%  | ΔVRAM MB | ΔVRAM%
+ ──────|──────|────────|───────|──────────|───────
+   32k |  512 |  -6.02 | -3.9% |   -727.8 | -33.7%
+   32k | 1024 | -10.27 | -2.8% |  -1715.2 | -44.4%
+   64k |  512 |  -3.11 | -1.5% |  -1495.8 | -43.9%
+   64k | 1024 | -34.09 | -7.2% |  -3507.2 | -57.2%

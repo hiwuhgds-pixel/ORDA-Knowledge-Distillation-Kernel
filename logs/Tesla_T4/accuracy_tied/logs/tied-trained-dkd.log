@@ -1,0 +1,110 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: accuracy
+────────────────────────────────────────────────────────
+ device     : cuda
+ gpu        : Tesla T4
+ dtype      : torch.float16 (amp, gradscale)
+ baseline   : fp32
+ components : ce, kl
+ case       : tied-trained-dkd
+
+ vocab       : 8192
+ dim         : 1024
+/usr/local/lib/python3.12/dist-packages/torch/_inductor/lowering.py:7627: UserWarning: 
+Online softmax is disabled on the fly since Inductor decides to
+split the reduction. Cut an issue to PyTorch if this is an
+important use case and you want to speed it up with online
+softmax.
+
+  warnings.warn(
+/usr/local/lib/python3.12/dist-packages/torch/_inductor/lowering.py:7627: UserWarning: 
+Online softmax is disabled on the fly since Inductor decides to
+split the reduction. Cut an issue to PyTorch if this is an
+important use case and you want to speed it up with online
+softmax.
+
+  warnings.warn(
+
+── seq=2048  batch=8 ───────────────────────────────────
+
+ CE · loss
+ backend         | value        | abs_err      | rel_err     
+ ────────────────|──────────────|──────────────|─────────────
+ fp32            | 1.842994e+01 |            0 |            0
+ torch           | 1.842991e+01 | 2.479553e-05 | 1.345394e-06
+ torch-compile   | 1.842994e+01 | 1.907349e-06 | 1.034919e-07
+ orda (1 chunk)  | 1.842994e+01 | 1.907349e-06 | 1.034919e-07
+ orda (8 chunk)  | 1.842994e+01 | 1.907349e-06 | 1.034919e-07
+ orda (32 chunk) | 1.842994e+01 | 1.907349e-06 | 1.034919e-07
+
+ CE · grad all active tensors
+ backend         | grad_cos   | grad_mean    | grad_max     | underflow   
+ ────────────────|────────────|──────────────|──────────────|─────────────
+ fp32            | 1.00000000 |            0 |            0 |   0/41926656
+ torch           | 0.99999944 | 2.350623e-08 | 1.807581e-06 | 919/41926656
+ torch-compile   | 0.99999944 | 2.158502e-08 | 1.482433e-06 | 870/41926656
+ orda (1 chunk)  | 0.99999947 | 2.111821e-08 | 1.496635e-06 |   6/41926656
+ orda (8 chunk)  | 0.99999947 | 2.103125e-08 | 1.513283e-06 |   7/41926656
+ orda (32 chunk) | 0.99999947 | 2.110182e-08 | 1.525390e-06 |  11/41926656
+
+ KL · loss
+ backend         | value        | abs_err      | rel_err     
+ ────────────────|──────────────|──────────────|─────────────
+ fp32            | 4.083492e-01 |            0 |            0
+ torch           | 4.083437e-01 | 5.483627e-06 | 1.342877e-05
+ torch-compile   | 4.083437e-01 | 5.483627e-06 | 1.342877e-05
+ orda (1 chunk)  | 4.083437e-01 | 5.424023e-06 | 1.328281e-05
+ orda (8 chunk)  | 4.083437e-01 | 5.424023e-06 | 1.328281e-05
+ orda (32 chunk) | 4.083437e-01 | 5.424023e-06 | 1.328281e-05
+
+ KL · grad all active tensors
+ backend         | grad_cos   | grad_mean    | grad_max     | underflow   
+ ────────────────|────────────|──────────────|──────────────|─────────────
+ fp32            | 1.00000000 |            0 |            0 |   0/25157632
+ torch           | 0.99999925 | 1.010256e-08 | 3.732712e-07 | 135/25157632
+ torch-compile   | 0.99999925 | 1.010188e-08 | 3.732712e-07 | 170/25157632
+ orda (1 chunk)  | 0.99999928 | 9.910117e-09 | 3.282912e-07 | 159/25157632
+ orda (8 chunk)  | 0.99999928 | 9.904053e-09 | 3.255409e-07 | 179/25157632
+ orda (32 chunk) | 0.99999928 | 9.902784e-09 | 3.225578e-07 | 162/25157632
+
+── seq=520  batch=17 ───────────────────────────────────
+
+ CE · loss
+ backend         | value        | abs_err      | rel_err     
+ ────────────────|──────────────|──────────────|─────────────
+ fp32            | 1.843645e+01 |            0 |            0
+ torch           | 1.843645e+01 | 3.814697e-06 | 2.069106e-07
+ torch-compile   | 1.843647e+01 | 1.716614e-05 | 9.310975e-07
+ orda (1 chunk)  | 1.843647e+01 | 1.716614e-05 | 9.310975e-07
+ orda (8 chunk)  | 1.843647e+01 | 1.716614e-05 | 9.310975e-07
+ orda (32 chunk) | 1.843647e+01 | 1.716614e-05 | 9.310975e-07
+
+ CE · grad all active tensors
+ backend         | grad_cos   | grad_mean    | grad_max     | underflow   
+ ────────────────|────────────|──────────────|──────────────|─────────────
+ fp32            | 1.00000000 |            0 |            0 |   0/26476544
+ torch           | 0.99999951 | 3.823539e-08 | 2.386863e-06 | 948/26476544
+ torch-compile   | 0.99999950 | 3.715867e-08 | 2.093177e-06 | 960/26476544
+ orda (1 chunk)  | 0.99999954 | 3.603505e-08 | 1.820823e-06 |   2/26476544
+ orda (8 chunk)  | 0.99999954 | 3.598463e-08 | 1.835491e-06 |   2/26476544
+ orda (32 chunk) | 0.99999954 | 3.605517e-08 | 1.840381e-06 |   1/26476544
+
+ KL · loss
+ backend         | value        | abs_err      | rel_err     
+ ────────────────|──────────────|──────────────|─────────────
+ fp32            | 4.093776e-01 |            0 |            0
+ torch           | 4.093726e-01 | 5.006790e-06 | 1.223025e-05
+ torch-compile   | 4.093726e-01 | 4.976988e-06 | 1.215745e-05
+ orda (1 chunk)  | 4.093727e-01 | 4.917383e-06 | 1.201185e-05
+ orda (8 chunk)  | 4.093727e-01 | 4.917383e-06 | 1.201185e-05
+ orda (32 chunk) | 4.093727e-01 | 4.917383e-06 | 1.201185e-05
+
+ KL · grad all active tensors
+ backend         | grad_cos   | grad_mean    | grad_max     | underflow  
+ ────────────────|────────────|──────────────|──────────────|────────────
+ fp32            | 1.00000000 |            0 |            0 |  0/17432576
+ torch           | 0.99999933 | 1.001252e-08 | 1.854496e-07 | 44/17432576
+ torch-compile   | 0.99999933 | 1.001078e-08 | 1.841181e-07 | 47/17432576
+ orda (1 chunk)  | 0.99999936 | 9.788043e-09 | 1.791414e-07 | 51/17432576
+ orda (8 chunk)  | 0.99999936 | 9.785436e-09 | 1.781955e-07 | 50/17432576
+ orda (32 chunk) | 0.99999936 | 9.785510e-09 | 1.780572e-07 | 48/17432576

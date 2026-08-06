@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    hooks:
+      - id: update-autotune-contract-digest
+        name: Update autotune contract fallback digest
+        entry: python scripts/update_contract_digest.py
+        language: python
+        pass_filenames: false
+        # Trigger only when a file in the timed contract surface changes.
+        # Mirrors AUTOTUNE_TIMED_CONTRACT_SOURCES in _autotune/_contract.py.
+        files: ^src/orda_kernel/(_runtime\.py|_torch_backend\.py|ops/_common\.py|ops/precomputed_inputs/_aligned_span_math\.py|ops/_kernels/_kl_math\.py|ops/_kernels/_tokenwise_launch\.py|ops/_kernels/ce_kl_fwdbwd\.py|ops/_kernels/tied/frozen\.py|ops/_kernels/tied/trained\.py|ops/_kernels/tied/cotrained\.py|ops/_kernels/precomputed/tokenwise\.py|ops/_kernels/precomputed/aligned_span\.py|ops/_kernels/separate/frozen\.py|ops/_kernels/separate/trained\.py|ops/_kernels/separate/cotrained\.py|_autotune/benchmark\.py|_autotune/keys\.py|_autotune/models\.py|_autotune/tuner\.py|_execution/dispatcher\.py|_execution/aligned_span\.py)$

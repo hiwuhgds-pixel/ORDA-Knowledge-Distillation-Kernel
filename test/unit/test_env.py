@@ -4,7 +4,6 @@ import argparse
 
 import pytest
 import torch
-
 from utils.env import parse_configs, torch_dtype, validate_cuda_dtype
 
 
@@ -38,3 +37,12 @@ def test_torch_dtype_rejects_unknown_alias():
 
 def test_validate_cuda_dtype_accepts_fp32_on_any_machine():
     validate_cuda_dtype(torch, torch.float32)
+
+
+def test_validate_cuda_dtype_rejects_emulated_bf16_on_pytorch_23(monkeypatch):
+    monkeypatch.setattr(torch.version, "hip", None)
+    monkeypatch.setattr(torch.cuda, "is_bf16_supported", lambda: True)
+    monkeypatch.setattr(torch.cuda, "get_device_capability", lambda: (7, 0))
+
+    with pytest.raises(RuntimeError, match="does not support bf16"):
+        validate_cuda_dtype(torch, torch.bfloat16)

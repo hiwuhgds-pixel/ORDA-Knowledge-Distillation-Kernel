@@ -20,12 +20,20 @@ def make_tied_inputs(
     seed: int,
     device: str = "cpu",
     ignore_index: int | None = -100,
+    scale: float = 0.1,
 ):
     set_seed(torch, seed)
-    hs = (torch.randn(BT, H, device=device, dtype=dtype) * 0.1).requires_grad_(True)
-    ht = (torch.randn(BT, H, device=device, dtype=dtype) * 0.1).requires_grad_(True)
-    weight = (torch.randn(V, H, device=device, dtype=dtype) * 0.1).requires_grad_(True)
-    return hs, ht, weight, _target(torch, BT=BT, V=V, device=device, ignore_index=ignore_index)
+    hs = (torch.randn(BT, H, device=device, dtype=dtype) * scale).requires_grad_(True)
+    ht = (torch.randn(BT, H, device=device, dtype=dtype) * scale).requires_grad_(True)
+    weight = (torch.randn(V, H, device=device, dtype=dtype) * scale).requires_grad_(
+        True
+    )
+    return (
+        hs,
+        ht,
+        weight,
+        _target(torch, BT=BT, V=V, device=device, ignore_index=ignore_index),
+    )
 
 
 def make_separate_inputs(
@@ -41,14 +49,17 @@ def make_separate_inputs(
     ignore_index: int | None = -100,
     teacher_requires_grad: bool = False,
     teacher_weight_requires_grad: bool = False,
+    scale: float = 0.1,
 ):
     set_seed(torch, seed)
-    hs = (torch.randn(BT, Hs, device=device, dtype=dtype) * 0.1).requires_grad_(True)
-    ht = torch.randn(BT, Ht, device=device, dtype=dtype) * 0.1
+    hs = (torch.randn(BT, Hs, device=device, dtype=dtype) * scale).requires_grad_(True)
+    ht = torch.randn(BT, Ht, device=device, dtype=dtype) * scale
     if teacher_requires_grad:
         ht = ht.requires_grad_(True)
-    weight = (torch.randn(V, Hs, device=device, dtype=dtype) * 0.1).requires_grad_(True)
-    teacher_weight = torch.randn(V, Ht, device=device, dtype=dtype) * 0.1
+    weight = (torch.randn(V, Hs, device=device, dtype=dtype) * scale).requires_grad_(
+        True
+    )
+    teacher_weight = torch.randn(V, Ht, device=device, dtype=dtype) * scale
     if teacher_weight_requires_grad:
         teacher_weight = teacher_weight.requires_grad_(True)
     target = _target(torch, BT=BT, V=V, device=device, ignore_index=ignore_index)

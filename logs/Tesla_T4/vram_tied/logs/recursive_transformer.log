@@ -1,0 +1,27 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: VRAM
+────────────────────────────────────────────────────────
+ device : cuda
+ gpu    : Tesla T4
+ dtype  : torch.float16
+ batch  : 8   T: 1.0
+ case   : Recursive Transformers · trained · forward
+
+
+── dim=512 ─────────────────────────────────────────────
+config                 torch     torch-compile     orda     deltaTorch  deltaCompile
+vocab=16k  seq=256    576.0 MB     448.1 MB      52.0 MB      -91.0%       -88.4%   
+vocab=16k  seq=512   1152.0 MB     896.1 MB      56.7 MB      -95.1%       -93.7%   
+vocab=16k  seq=1024  2304.0 MB     1792.3 MB     81.3 MB      -96.5%       -95.5%   
+vocab=32k  seq=256   1152.0 MB     896.1 MB      100.0 MB     -91.3%       -88.8%   
+vocab=32k  seq=512   2304.0 MB     1792.1 MB     104.7 MB     -95.5%       -94.2%   
+vocab=32k  seq=1024  4608.0 MB     3584.3 MB     145.3 MB     -96.8%       -95.9%   
+
+── dim=1024 ────────────────────────────────────────────
+config                 torch     torch-compile     orda     deltaTorch  deltaCompile
+vocab=16k  seq=256    576.0 MB     448.1 MB      104.0 MB     -81.9%       -76.8%   
+vocab=16k  seq=512   1152.0 MB     896.1 MB      112.0 MB     -90.3%       -87.5%   
+vocab=16k  seq=1024  2304.0 MB     1792.3 MB     130.6 MB     -94.3%       -92.7%   
+vocab=32k  seq=256   1152.0 MB     896.1 MB      200.0 MB     -82.6%       -77.7%   
+vocab=32k  seq=512   2304.0 MB     1792.1 MB     208.0 MB     -91.0%       -88.4%   
+vocab=32k  seq=1024  4608.0 MB     3584.3 MB     226.6 MB     -95.1%       -93.7%   

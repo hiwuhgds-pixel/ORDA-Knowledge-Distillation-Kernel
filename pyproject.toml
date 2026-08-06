@@ -1,19 +1,92 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "orda-ce-kernel"
+name = "orda-kernel"
 version = "0.1.0"
-description = "Per-mode Triton CE/KL distillation kernels for ORDA."
+description = "Chunked Triton CE/KL distillation for ORDA."
+readme = "README.md"
 requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [
+    { name = "hiwuhgds-pixel" },
+]
+keywords = [
+    "knowledge-distillation",
+    "machine-learning",
+    "pytorch",
+    "triton",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Typing :: Typed",
+]
 dependencies = [
-    "torch",
+    "torch>=2.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/hiwuhgds-pixel/ORDA-Knowledge-Distillation-Kernel"
+Documentation = "https://github.com/hiwuhgds-pixel/ORDA-Knowledge-Distillation-Kernel#readme"
+Repository = "https://github.com/hiwuhgds-pixel/ORDA-Knowledge-Distillation-Kernel"
+Issues = "https://github.com/hiwuhgds-pixel/ORDA-Knowledge-Distillation-Kernel/issues"
+Changelog = "https://github.com/hiwuhgds-pixel/ORDA-Knowledge-Distillation-Kernel/blob/main/CHANGELOG.md"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0",
+]
+ci = [
+    "mypy>=1.11",
+    "pytest>=8.0",
+    "pytest-repeat>=0.9",
+    "ruff>=0.6",
+]
+gpu = [
+    "triton>=2.0",
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+orda_kernel = ["py.typed"]
+
 [tool.pytest.ini_options]
 testpaths = ["test"]
 pythonpath = ["src", "test"]
+markers = [
+    "gpu: requires CUDA/HIP and Triton kernels",
+    "autotune: executes the real autotune timing path",
+    "multiprocess: requires SQLite cache coordination across spawned processes",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"test/correctness/test_cartesian_cuda.py" = ["E402"]
+"test/correctness/test_low_level_ops_cuda.py" = ["E402"]
+"test/correctness/test_public_api_cuda.py" = ["E402"]
+"test/nightly/test_autotune_full_batch_cuda.py" = ["E402"]
+
+[tool.mypy]
+files = ["src"]
+python_version = "3.10"
+ignore_missing_imports = true
+follow_imports = "silent"

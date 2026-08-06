@@ -1,0 +1,52 @@
+────────────────────────────────────────────────────────
+ TEST: CPU suite
+────────────────────────────────────────────────────────
+ device : cpu
+ gpu    : -
+ scope  : unit, CPU correctness, multiprocess
+
+
+── CPU tests ───────────────────────────────────────────
+[progress] test/unit/api/test_low_level_ops.py complete (248/248); overall 248/1806 (13.7%)
+[progress] test/unit/api/test_public_api.py complete (184/184); overall 432/1806 (23.9%)
+[progress] test/unit/autotune/test_autotune.py complete (40/40); overall 472/1806 (26.1%)
+s[progress] test/unit/autotune/test_autotune_cache.py complete (27/27); overall 499/1806 (27.6%)
+[progress] test/unit/autotune/test_autotune_contract_identity.py complete (16/16); overall 515/1806 (28.5%)
+[progress] test/unit/autotune/test_device_fingerprint.py complete (13/13); overall 528/1806 (29.2%)
+[progress] test/unit/autotune/test_kernel_launch_request_wiring.py complete (48/48); overall 576/1806 (31.9%)
+[progress] test/unit/contracts/test_autograd_abi.py complete (16/16); overall 592/1806 (32.8%)
+[progress] test/unit/contracts/test_cartesian_matrix.py complete (16/16); overall 608/1806 (33.7%)
+[progress] test/unit/contracts/test_ci_scripts.py complete (6/6); overall 614/1806 (34.0%)
+[progress] test/unit/contracts/test_direct_gpu_sharding.py complete (4/4); overall 618/1806 (34.2%)
+[progress] test/unit/contracts/test_kernel_specializations.py complete (20/20); overall 638/1806 (35.3%)
+[progress] test/unit/contracts/test_no_config_dependency.py complete (2/2); overall 640/1806 (35.4%)
+[progress] test/unit/contracts/test_runner_logging.py complete (6/6); overall 646/1806 (35.8%)
+[progress] test/unit/contracts/test_source_contracts.py complete (4/4); overall 650/1806 (36.0%)
+[progress] test/unit/execution/test_dispatcher.py complete (30/30); overall 680/1806 (37.7%)
+[progress] test/unit/execution/test_grad_weight_accum_policy.py complete (14/14); overall 694/1806 (38.4%)
+[progress] test/unit/execution/test_resolver.py complete (30/30); overall 724/1806 (40.1%)
+[progress] test/unit/execution/test_runtime_dtype_policy.py complete (12/12); overall 736/1806 (40.8%)
+[progress] test/unit/execution/test_weight_grad_row_mask.py complete (16/16); overall 752/1806 (41.6%)
+[progress] test/unit/kl/test_dual_temperature.py complete (101/101); overall 853/1806 (47.2%)
+[progress] test/unit/kl/test_kl_hyperparameters.py complete (71/71); overall 924/1806 (51.2%)
+[progress] test/unit/kl/test_kl_numerics.py complete (182/182); overall 1106/1806 (61.2%)
+[progress] test/unit/kl/test_kl_variants.py complete (466/466); overall 1572/1806 (87.0%)
+[progress] test/unit/precomputed/test_aligned_span.py complete (38/38); overall 1610/1806 (89.1%)
+[progress] test/unit/precomputed/test_aligned_span_triton_pipeline.py complete (24/24); overall 1634/1806 (90.5%)
+[progress] test/unit/precomputed/test_cross_vocab_projection.py complete (31/31); overall 1665/1806 (92.2%)
+[progress] test/unit/precomputed/test_multi_teacher.py complete (27/27); overall 1692/1806 (93.7%)
+[progress] test/unit/precomputed/test_precomputed_cache_contract.py complete (38/38); overall 1730/1806 (95.8%)
+[progress] test/unit/precomputed/test_precomputed_dtype_contract.py complete (20/20); overall 1750/1806 (96.9%)
+[progress] test/unit/precomputed/test_precomputed_inputs_namespace.py complete (5/5); overall 1755/1806 (97.2%)
+[progress] test/unit/test_env.py complete (13/13); overall 1768/1806 (97.9%)
+[progress] test/unit/topology/test_tied_topology.py complete (9/9); overall 1777/1806 (98.4%)
+[progress] test/correctness/test_torch_backend_cpu.py complete (24/24); overall 1801/1806 (99.7%)
+[progress] test/nightly/test_autotune_multiprocess.py complete (5/5); overall 1806/1806 (100.0%)
+                                                                         [100%]
+============================== warnings summary ===============================
+test/unit/api/test_public_api.py::test_default_auto_backend_on_cpu_matches_explicit_torch_backend
+  C:\Users\nguye\AppData\Local\Programs\Python\Python312\Lib\site-packages\torch\_dynamo\eval_frame.py:1298: RuntimeWarning: ORDA distillation_loss(backend='auto') fell back to the torch reference (Triton import failed with ModuleNotFoundError: No module named 'triton'). This path materializes the full (BT, vocab) logits and does not use the fused chunked kernel. Pass backend='torch' to silence this, or ensure Triton + a supported CUDA/HIP dtype for the fused path.
+    return fn(*args, **kwargs)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+1805 passed, 1 skipped, 1 warning in 144.56s (0:02:24)

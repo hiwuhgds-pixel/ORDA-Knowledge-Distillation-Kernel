@@ -1,0 +1,127 @@
+────────────────────────────────────────────────────────
+ TEST: GPU suite
+────────────────────────────────────────────────────────
+ device : cuda
+ gpu    : Tesla T4
+ tests  : dlogits, kl-variants, low-level, public-api, autotune, cartesian
+ routes : tied, separate, precomputed_logits, precomputed_hidden_weight
+ dtype  : float16, float32
+
+[cartesian] skipping unsupported dtype(s): bfloat16
+
+── test 1/9 · dlogits ──────────────────────────────────
+[progress] test/correctness/test_dlogits_contract_cuda.py complete (20/20); overall 20/20 (100.0%)
+                                                                         [100%]
+20 passed in 12.18s
+
+── test 2/9 · kl-variants ──────────────────────────────
+[progress] test/correctness/test_kl_variants_cuda.py complete (301/301); overall 301/301 (100.0%)
+                                                                         [100%]
+301 passed in 86.53s (0:01:26)
+
+── test 3/9 · low-level ────────────────────────────────
+[progress] test/correctness/test_low_level_ops_cuda.py complete (1106/1106); overall 1106/1106 (100.0%)
+                                                                         [100%]
+1106 passed in 405.85s (0:06:45)
+
+── test 4/9 · public-api ───────────────────────────────
+s[progress] test/correctness/test_public_api_cuda.py complete (52/52); overall 52/52 (100.0%)
+                                                                         [100%]
+51 passed, 1 skipped in 39.96s
+
+── test 5/9 · autotune ─────────────────────────────────
+[progress] test/nightly/test_autotune_full_batch_cuda.py complete (24/24); overall 24/24 (100.0%)
+                                                                         [100%]
+24 passed in 234.49s (0:03:54)
+
+── test 6/9 · cartesian route 1/4 · tied ───────────────
+collected 200 items
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py started: 345600 cases
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 69120/345600 (20.0%), elapsed 02:29, ETA 09:57
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 138240/345600 (40.0%), elapsed 05:05, ETA 07:37
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 207360/345600 (60.0%), elapsed 07:44, ETA 05:09
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 276480/345600 (80.0%), elapsed 10:23, ETA 02:35
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 345600/345600 (100.0%), elapsed 13:08, ETA 00:00
+                                                                         [100%]
+======================= 200 passed in 805.12s (0:13:25) ========================
+
+── test 7/9 · cartesian route 2/4 · separate ───────────
+collected 200 items
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py started: 345600 cases
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 69120/345600 (20.0%), elapsed 02:28, ETA 09:55
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 138240/345600 (40.0%), elapsed 05:06, ETA 07:40
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 207360/345600 (60.0%), elapsed 07:44, ETA 05:09
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 276480/345600 (80.0%), elapsed 10:23, ETA 02:35
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 345600/345600 (100.0%), elapsed 13:04, ETA 00:00
+                                                                         [100%]
+======================= 200 passed in 800.09s (0:13:20) ========================
+
+── test 8/9 · cartesian route 3/4 · precomputed_logits ──
+collected 200 items
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py started: 345600 cases
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 69120/345600 (20.0%), elapsed 01:29, ETA 05:57
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 138240/345600 (40.0%), elapsed 03:04, ETA 04:37
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 207360/345600 (60.0%), elapsed 04:59, ETA 03:19
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 276480/345600 (80.0%), elapsed 06:58, ETA 01:44
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 345600/345600 (100.0%), elapsed 09:01, ETA 00:00
+                                                                         [100%]
+======================= 200 passed in 554.71s (0:09:14) ========================
+
+── test 9/9 · cartesian route 4/4 · precomputed_hidden_weight ──
+collected 200 items
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py started: 345600 cases
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 69120/345600 (20.0%), elapsed 01:37, ETA 06:28
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 138240/345600 (40.0%), elapsed 03:19, ETA 04:59
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 207360/345600 (60.0%), elapsed 05:21, ETA 03:34
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 276480/345600 (80.0%), elapsed 07:22, ETA 01:50
+
+test/correctness/test_cartesian_cuda.py 
+[progress] test/correctness/test_cartesian_cuda.py: 345600/345600 (100.0%), elapsed 09:24, ETA 00:00
+                                                                         [100%]
+======================= 200 passed in 576.55s (0:09:36) ========================

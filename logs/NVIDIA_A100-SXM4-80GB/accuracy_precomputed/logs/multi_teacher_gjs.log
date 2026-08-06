@@ -1,0 +1,11 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: accuracy
+────────────────────────────────────────────────────────
+ device : cuda
+ gpu    : NVIDIA A100 80GB PCIe
+ dtype  : fp64 reference
+ case   : multi_teacher_gjs
+
+ check | shape | nonfinite_mismatch | max_abs_error          | max_rel_error        
+ ──────|───────|────────────────────|────────────────────────|──────────────────────
+ gjs   |    17 |                  0 | 1.1102230246251565e-16 | 6.923085566881944e-16

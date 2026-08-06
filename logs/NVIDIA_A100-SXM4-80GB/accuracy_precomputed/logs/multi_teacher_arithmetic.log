@@ -1,0 +1,11 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: accuracy
+────────────────────────────────────────────────────────
+ device : cuda
+ gpu    : NVIDIA A100 80GB PCIe
+ dtype  : fp64 reference
+ case   : multi_teacher_arithmetic
+
+ check      | shape | nonfinite_mismatch | max_abs_error         | max_rel_error         
+ ───────────|───────|────────────────────|───────────────────────|───────────────────────
+ arithmetic | 17x29 |                  0 | 8.881784197001252e-16 | 2.1644286270355116e-16

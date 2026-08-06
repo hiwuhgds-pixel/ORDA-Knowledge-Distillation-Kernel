@@ -1,0 +1,12 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: accuracy
+────────────────────────────────────────────────────────
+ device : cuda
+ gpu    : Tesla T4
+ dtype  : torch.float16 (amp, gradscale)
+ case   : cross_vocab_end_to_end_precomputed_loss
+
+ check        | shape  | nonfinite_mismatch | max_abs_error          | max_rel_error        
+ ─────────────|────────|────────────────────|────────────────────────|──────────────────────
+ loss         | scalar |                  0 |   4.76837158203125e-06 | 7.076616474348999e-07
+ student_grad |  40960 |                  0 | 2.0568259060382843e-06 |     8.165369217081851

@@ -1,0 +1,11 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: accuracy
+────────────────────────────────────────────────────────
+ device : cuda
+ gpu    : NVIDIA A100 80GB PCIe
+ dtype  : fp64 reference
+ case   : precomputed_span_teacher_cache_build
+
+ check          | shape | nonfinite_mismatch | max_abs_error          | max_rel_error         
+ ───────────────|───────|────────────────────|────────────────────────|───────────────────────
+ span_log_probs |     3 |                  0 | 1.0658141036401503e-14 | 3.4510611317782726e-16

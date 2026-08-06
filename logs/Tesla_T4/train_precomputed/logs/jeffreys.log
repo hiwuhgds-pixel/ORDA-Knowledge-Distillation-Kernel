@@ -1,0 +1,165 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: train
+────────────────────────────────────────────────────────
+ device        : cuda
+ gpu           : Tesla T4
+ dtype         : torch.float16 (amp, gradscale)
+ batch         : 8   warmup: 5   steps: 50   passes: 2   T: 3.0
+ teacher       : {'dim': 1024, 'q_heads': 8, 'kv_heads': 4, 'n_layers': 8, 'ffn_dim': 2816}
+ student       : {'dim': 512, 'q_heads': 4, 'kv_heads': 2, 'n_layers': 4, 'ffn_dim': 1408}
+ case          : PrecomputedTeacher · jeffreys
+ kl_divergence : jeffreys
+
+
+── vocab=32k  seq=512 ──────────────────────────────────
+  hidden
+          backend       ms/step         peakVRAM     cacheTeacher        totalVRAM
+    pass 1/2 (↓ top-down)
+             orda      89.57 ms         891.9 MB          72.0 MB         963.9 MB
+    torch-compile     100.87 ms        1646.2 MB          72.0 MB        1718.2 MB
+    pass 2/2 (↑ bottom-up)
+    torch-compile     103.34 ms        1646.2 MB          72.0 MB        1718.2 MB
+             orda      97.02 ms         895.2 MB          72.0 MB         967.2 MB
+    average
+             orda      93.29 ms         893.5 MB          72.0 MB         965.5 MB
+    torch-compile     102.11 ms        1646.2 MB          72.0 MB        1718.2 MB
+    Δ orda vs torch-compile   -8.81 ms (-8.6%)   -752.7 MB (-43.8%)
+
+  logits
+          backend       ms/step         peakVRAM     cacheTeacher        totalVRAM
+    pass 1/2 (↓ top-down)
+             orda      74.31 ms         828.7 MB         256.0 MB        1084.7 MB
+    torch-compile      85.60 ms        1388.5 MB         256.0 MB        1644.5 MB
+    pass 2/2 (↑ bottom-up)
+    torch-compile      88.69 ms        1388.5 MB         256.0 MB        1644.5 MB
+             orda      80.91 ms         828.4 MB         256.0 MB        1084.4 MB
+    average
+             orda      77.61 ms         828.5 MB         256.0 MB        1084.5 MB
+    torch-compile      87.15 ms        1388.5 MB         256.0 MB        1644.5 MB
+    Δ orda vs torch-compile   -9.53 ms (-10.9%)   -559.9 MB (-34.0%)
+  Δ orda-hidden vs orda-logits   +15.68 ms (+20.2%)   -119.0 MB (-11.0%)
+
+── vocab=32k  seq=1024 ─────────────────────────────────
+  hidden
+          backend       ms/step         peakVRAM     cacheTeacher        totalVRAM
+    pass 1/2 (↓ top-down)
+             orda     200.68 ms        1586.0 MB          80.0 MB        1666.0 MB
+    torch-compile     207.03 ms        3344.8 MB          80.0 MB        3424.8 MB
+    pass 2/2 (↑ bottom-up)
+    torch-compile     224.67 ms        3344.8 MB          80.0 MB        3424.8 MB
+             orda     211.44 ms        1584.7 MB          80.0 MB        1664.7 MB
+    average
+             orda     206.06 ms        1585.3 MB          80.0 MB        1665.3 MB
+    torch-compile     215.85 ms        3344.8 MB          80.0 MB        3424.8 MB
+    Δ orda vs torch-compile   -9.79 ms (-4.5%)   -1759.4 MB (-51.4%)
+
+  logits
+          backend       ms/step         peakVRAM     cacheTeacher        totalVRAM
+    pass 1/2 (↓ top-down)
+             orda     164.64 ms        1522.0 MB         512.0 MB        2034.0 MB
+    torch-compile     183.33 ms        2832.8 MB         512.0 MB        3344.8 MB
+    pass 2/2 (↑ bottom-up)
+    torch-compile     195.48 ms        2832.8 MB         512.0 MB        3344.8 MB
+             orda     180.38 ms        1520.7 MB         512.0 MB        2032.7 MB
+    average
+             orda     172.51 ms        1521.3 MB         512.0 MB        2033.3 MB
+    torch-compile     189.40 ms        2832.8 MB         512.0 MB        3344.8 MB
+    Δ orda vs torch-compile   -16.89 ms (-8.9%)   -1311.4 MB (-39.2%)
+  Δ orda-hidden vs orda-logits   +33.55 ms (+19.4%)   -368.0 MB (-18.1%)
+
+── vocab=64k  seq=512 ──────────────────────────────────
+  hidden
+          backend       ms/step         peakVRAM     cacheTeacher        totalVRAM
+    pass 1/2 (↓ top-down)
+             orda     142.19 ms        1243.9 MB         136.0 MB        1379.9 MB
+    torch-compile     163.42 ms        2766.2 MB         136.0 MB        2902.2 MB
+    pass 2/2 (↑ bottom-up)
+    torch-compile     174.33 ms        2766.2 MB         136.0 MB        2902.2 MB
+             orda     153.69 ms        1247.2 MB         136.0 MB        1383.2 MB
+    average
+             orda     147.94 ms        1245.5 MB         136.0 MB        1381.5 MB
+    torch-compile     168.88 ms        2766.2 MB         136.0 MB        2902.2 MB
+    Δ orda vs torch-compile   -20.94 ms (-12.4%)   -1520.7 MB (-52.4%)
+
+  logits
+          backend       ms/step         peakVRAM     cacheTeacher        totalVRAM
+    pass 1/2 (↓ top-down)
+             orda     111.89 ms        1116.7 MB         512.0 MB        1628.7 MB
+    torch-compile     134.13 ms        2251.7 MB         512.0 MB        2763.7 MB
+    pass 2/2 (↑ bottom-up)
+    torch-compile     140.73 ms        2251.7 MB         512.0 MB        2763.7 MB
+             orda     121.40 ms        1116.7 MB         512.0 MB        1628.7 MB
+    average
+             orda     116.65 ms        1116.7 MB         512.0 MB        1628.7 MB
+    torch-compile     137.43 ms        2251.7 MB         512.0 MB        2763.7 MB
+    Δ orda vs torch-compile   -20.78 ms (-15.1%)   -1135.1 MB (-41.1%)
+  Δ orda-hidden vs orda-logits   +31.29 ms (+26.8%)   -247.1 MB (-15.2%)
+
+── vocab=64k  seq=1024 ─────────────────────────────────
+  hidden
+          backend       ms/step         peakVRAM     cacheTeacher        totalVRAM
+    pass 1/2 (↓ top-down)
+             orda     313.32 ms        1938.0 MB         144.0 MB        2082.0 MB
+    torch-compile     344.93 ms        5488.8 MB         144.0 MB        5632.8 MB
+    pass 2/2 (↑ bottom-up)
+    torch-compile     401.08 ms        5488.8 MB         144.0 MB        5632.8 MB
+             orda     302.56 ms        1936.7 MB         144.0 MB        2080.7 MB
+    average
+             orda     307.94 ms        1937.3 MB         144.0 MB        2081.3 MB
+    torch-compile     373.01 ms        5488.8 MB         144.0 MB        5632.8 MB
+    Δ orda vs torch-compile   -65.07 ms (-17.4%)   -3551.4 MB (-63.0%)
+
+  logits
+          backend       ms/step         peakVRAM     cacheTeacher        totalVRAM
+    pass 1/2 (↓ top-down)
+             orda     255.85 ms        1810.0 MB        1024.0 MB        2834.0 MB
+    torch-compile     311.29 ms        4464.8 MB        1024.0 MB        5488.8 MB
+    pass 2/2 (↑ bottom-up)
+    torch-compile     316.53 ms        4464.8 MB        1024.0 MB        5488.8 MB
+             orda     241.49 ms        1808.7 MB        1024.0 MB        2832.7 MB
+    average
+             orda     248.67 ms        1809.3 MB        1024.0 MB        2833.3 MB
+    torch-compile     313.91 ms        4464.8 MB        1024.0 MB        5488.8 MB
+    Δ orda vs torch-compile   -65.24 ms (-20.8%)   -2655.4 MB (-48.4%)
+  Δ orda-hidden vs orda-logits   +59.27 ms (+23.8%)   -752.0 MB (-26.5%)
+────────────────────────────────────────────────────────
+ SUMMARY
+────────────────────────────────────────────────────────
+ vocab | seq  | mode                 | source | backend       | ms/step | peakVRAM MB | cacheTeacher MB | totalVRAM MB
+ ──────|──────|──────────────────────|────────|───────────────|─────────|─────────────|─────────────────|─────────────
+   32k |  512 | orda-hidden          | hidden | orda          |   93.29 |       893.5 |            72.0 |        965.5
+   32k |  512 | torch-compile-hidden | hidden | torch-compile |  102.11 |      1646.2 |            72.0 |       1718.2
+   32k |  512 | orda-logits          | logits | orda          |   77.61 |       828.5 |           256.0 |       1084.5
+   32k |  512 | torch-compile-logits | logits | torch-compile |   87.15 |      1388.5 |           256.0 |       1644.5
+   32k | 1024 | orda-hidden          | hidden | orda          |  206.06 |      1585.3 |            80.0 |       1665.3
+   32k | 1024 | torch-compile-hidden | hidden | torch-compile |  215.85 |      3344.8 |            80.0 |       3424.8
+   32k | 1024 | orda-logits          | logits | orda          |  172.51 |      1521.3 |           512.0 |       2033.3
+   32k | 1024 | torch-compile-logits | logits | torch-compile |  189.40 |      2832.8 |           512.0 |       3344.8
+   64k |  512 | orda-hidden          | hidden | orda          |  147.94 |      1245.5 |           136.0 |       1381.5
+   64k |  512 | torch-compile-hidden | hidden | torch-compile |  168.88 |      2766.2 |           136.0 |       2902.2
+   64k |  512 | orda-logits          | logits | orda          |  116.65 |      1116.7 |           512.0 |       1628.7
+   64k |  512 | torch-compile-logits | logits | torch-compile |  137.43 |      2251.7 |           512.0 |       2763.7
+   64k | 1024 | orda-hidden          | hidden | orda          |  307.94 |      1937.3 |           144.0 |       2081.3
+   64k | 1024 | torch-compile-hidden | hidden | torch-compile |  373.01 |      5488.8 |           144.0 |       5632.8
+   64k | 1024 | orda-logits          | logits | orda          |  248.67 |      1809.3 |          1024.0 |       2833.3
+   64k | 1024 | torch-compile-logits | logits | torch-compile |  313.91 |      4464.8 |          1024.0 |       5488.8
+
+ ORDA vs torch-compile
+ vocab | seq  | source | Δms    | Δms%   | ΔVRAM MB | ΔVRAM%
+ ──────|──────|────────|────────|────────|──────────|───────
+   32k |  512 | hidden |  -8.81 |  -8.6% |   -752.7 | -43.8%
+   32k |  512 | logits |  -9.53 | -10.9% |   -559.9 | -34.0%
+   32k | 1024 | hidden |  -9.79 |  -4.5% |  -1759.4 | -51.4%
+   32k | 1024 | logits | -16.89 |  -8.9% |  -1311.4 | -39.2%
+   64k |  512 | hidden | -20.94 | -12.4% |  -1520.7 | -52.4%
+   64k |  512 | logits | -20.78 | -15.1% |  -1135.1 | -41.1%
+   64k | 1024 | hidden | -65.07 | -17.4% |  -3551.4 | -63.0%
+   64k | 1024 | logits | -65.24 | -20.8% |  -2655.4 | -48.4%
+
+ ORDA hidden vs ORDA logits
+ vocab | seq  | Δms    | Δms%   | ΔVRAM MB | ΔVRAM%
+ ──────|──────|────────|────────|──────────|───────
+   32k |  512 | +15.68 | +20.2% |   -119.0 | -11.0%
+   32k | 1024 | +33.55 | +19.4% |   -368.0 | -18.1%
+   64k |  512 | +31.29 | +26.8% |   -247.1 | -15.2%
+   64k | 1024 | +59.27 | +23.8% |   -752.0 | -26.5%

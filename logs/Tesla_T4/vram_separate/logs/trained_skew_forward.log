@@ -1,0 +1,29 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: VRAM
+────────────────────────────────────────────────────────
+ device        : cuda
+ gpu           : Tesla T4
+ dtype         : torch.float16
+ batch         : 8   T: 3.0
+ case          : SeparateTeacher trained · skew_forward
+ kl_divergence : skew_forward
+ hidden_dims   : 256→512, 512→1024
+
+
+── student_dim=256  teacher_dim=512 ────────────────────
+config                 torch     torch-compile     orda     deltaTorch  deltaCompile
+vocab=16k  seq=256    832.0 MB     384.1 MB      75.0 MB      -91.0%       -80.5%   
+vocab=16k  seq=512   1664.0 MB     768.1 MB      78.0 MB      -95.3%       -89.8%   
+vocab=16k  seq=1024  3328.0 MB     1536.3 MB     84.0 MB      -97.5%       -94.5%   
+vocab=32k  seq=256   1664.0 MB     768.1 MB      147.0 MB     -91.2%       -80.9%   
+vocab=32k  seq=512   3328.0 MB     1536.1 MB     150.0 MB     -95.5%       -90.2%   
+vocab=32k  seq=1024  6656.0 MB     3072.3 MB     156.0 MB     -97.7%       -94.9%   
+
+── student_dim=512  teacher_dim=1024 ───────────────────
+config                 torch     torch-compile     orda     deltaTorch  deltaCompile
+vocab=16k  seq=256    832.0 MB     384.1 MB      150.0 MB     -82.0%       -60.9%   
+vocab=16k  seq=512   1664.0 MB     768.1 MB      156.0 MB     -90.6%       -79.7%   
+vocab=16k  seq=1024  3328.0 MB     1536.3 MB     168.0 MB     -95.0%       -89.1%   
+vocab=32k  seq=256   1664.0 MB     768.1 MB      294.0 MB     -82.3%       -61.7%   
+vocab=32k  seq=512   3328.0 MB     1536.1 MB     300.0 MB     -91.0%       -80.5%   
+vocab=32k  seq=1024  6656.0 MB     3072.3 MB     312.0 MB     -95.3%       -89.8%   

@@ -1,0 +1,113 @@
+name: Release candidate correctness
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-wheel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip setuptools wheel
+      - run: python -m pip wheel --no-deps --wheel-dir dist .
+      - name: Verify wheel and release-tag version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+            python .github/scripts/verify_wheel.py dist/*.whl \
+              --expected-version "${GITHUB_REF_NAME#v}"
+          else
+            python .github/scripts/verify_wheel.py dist/*.whl
+          fi
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-wheel
+          path: dist/*.whl
+          if-no-files-found: error
+
+  release-contracts:
+    needs: build-wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-wheel
+          path: dist
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install "torch>=2.3.0" "pytest>=8.0"
+      - run: python -m pip install --no-deps --force-reinstall dist/*.whl
+      - name: Verify installed release wheel
+        run: >-
+          python -c "import pathlib, orda_kernel;
+          p=pathlib.Path(orda_kernel.__file__).resolve();
+          source=(pathlib.Path.cwd() / 'src').resolve();
+          assert not p.is_relative_to(source), p;
+          print(p)"
+      - run: python -m pytest -o pythonpath=test -m "not gpu" test/unit test/correctness/test_torch_backend_cpu.py test/nightly/test_autotune_multiprocess.py
+
+  publish-pypi:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: [build-wheel, release-contracts]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-wheel
+          path: dist
+      - run: python -m pip install --upgrade twine
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*.whl
+
+  publish-github-release:
+    if: github.event_name == 'push' && github.ref_type == 'tag'
+    needs: [build-wheel, release-contracts]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: release-wheel
+          path: dist
+      - name: Re-verify artifact version before publish
+        shell: bash
+        run: >-
+          python .github/scripts/verify_wheel.py dist/*.whl
+          --expected-version "${GITHUB_REF_NAME#v}"
+      - name: Publish validated wheel
+        env:
+          GH_TOKEN: "${{ github.token }}"
+          GH_REPO: "${{ github.repository }}"
+        run: >-
+          gh release create "${{ github.ref_name }}"
+          dist/*.whl
+          --verify-tag
+          --generate-notes

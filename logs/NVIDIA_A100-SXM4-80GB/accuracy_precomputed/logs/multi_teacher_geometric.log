@@ -1,0 +1,11 @@
+────────────────────────────────────────────────────────
+ BENCHMARK: accuracy
+────────────────────────────────────────────────────────
+ device : cuda
+ gpu    : NVIDIA A100 80GB PCIe
+ dtype  : fp64 reference
+ case   : multi_teacher_geometric
+
+ check     | shape | nonfinite_mismatch | max_abs_error | max_rel_error
+ ──────────|───────|────────────────────|───────────────|──────────────
+ geometric | 17x29 |                  0 |           0.0 |           0.0

@@ -22,10 +22,10 @@ def import_torch():
 
 def import_orda():
     try:
-        return importlib.import_module("orda_ce_kernel")
+        return importlib.import_module("orda_kernel")
     except ModuleNotFoundError as exc:
         raise RuntimeError(
-            "orda_ce_kernel is not importable. Run tests from the project environment."
+            "orda_kernel is not importable. Run tests from the project environment."
         ) from exc
 
 
@@ -58,9 +58,13 @@ def parse_configs(value: str) -> list[tuple[int, int]]:
             batch = int(b_raw)
             seq = int(s_raw)
         except ValueError as exc:
-            raise argparse.ArgumentTypeError(f"Config must be BxS, got {item!r}") from exc
+            raise argparse.ArgumentTypeError(
+                f"Config must be BxS, got {item!r}"
+            ) from exc
         if batch <= 0 or seq <= 0:
-            raise argparse.ArgumentTypeError(f"Config values must be positive, got {item!r}")
+            raise argparse.ArgumentTypeError(
+                f"Config values must be positive, got {item!r}"
+            )
         configs.append((batch, seq))
     if not configs:
         raise argparse.ArgumentTypeError("At least one BxS config is required")
@@ -80,7 +84,16 @@ def torch_dtype(torch, name: str):
 
 def validate_cuda_dtype(torch, dtype) -> None:
     if dtype is torch.bfloat16 and hasattr(torch.cuda, "is_bf16_supported"):
-        if not torch.cuda.is_bf16_supported():
+        supports_bf16 = torch.cuda.is_bf16_supported
+        try:
+            supported = supports_bf16(including_emulation=False)
+        except TypeError:
+            if getattr(torch.version, "hip", None) is not None:
+                supported = supports_bf16()
+            else:
+                major, _ = torch.cuda.get_device_capability()
+                supported = major >= 8
+        if not supported:
             raise RuntimeError("CUDA device does not support bf16")
 
 

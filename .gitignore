@@ -5,6 +5,10 @@ __pycache__/
 .ruff_cache/
 .venv/
 venv/
+*.egg-info/
+build/
+dist/
+dist-review/
 profile_results/
 *.ncu-rep
 *.nsys-rep

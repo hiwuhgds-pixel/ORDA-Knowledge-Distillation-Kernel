@@ -1,0 +1,9 @@
+vocab,seq,mode,source,backend,ms_per_step,work_vram_mb,cache_teacher_mb,total_vram_mb
+32768,512,orda-logits,logits,orda,101.97664308547974,1244.9814453125,512.0,1756.9814453125
+32768,512,torch-compile-logits,logits,torch-compile,85.66397790908813,1390.22802734375,512.0,1902.22802734375
+32768,1024,orda-logits,logits,orda,222.25558757781982,1937.3564453125,1024.0,2961.3564453125
+32768,1024,torch-compile-logits,logits,torch-compile,189.46195335388182,2833.91943359375,1024.0,3857.91943359375
+65536,512,orda-logits,logits,orda,170.08016262054446,1949.4814453125,1024.0,2973.4814453125
+65536,512,torch-compile-logits,logits,torch-compile,141.44296913146974,2254.22802734375,1024.0,3278.22802734375
+65536,1024,orda-logits,logits,orda,OOM,OOM,OOM,OOM
+65536,1024,torch-compile-logits,logits,torch-compile,OOM,OOM,OOM,OOM
