@@ -165,6 +165,11 @@ def _addmm_supports_out_dtype(
         torch.bfloat16,
     ):
         return False
+    # hipBLASLt does not expose mixed-dtype accumulation (fp16/bf16 → fp32) on
+    # ROCm. PyTorch's addmm_out_cuda_impl may raise a TORCH_CHECK whose message
+    # does not contain "could not run", which the RuntimeError filter in the probe
+    # below would not catch. Skipping the probe avoids a potential unhandled
+    # exception on ROCm regardless of the exact failure mode.
     if destination.device.type != "cuda" or torch.version.hip is not None:
         return False
     if not hasattr(torch.ops.aten.addmm, "dtype_out"):
