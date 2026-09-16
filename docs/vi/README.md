@@ -22,7 +22,6 @@ Triton kernel cho cross-entropy và KL-divergence knowledge distillation. `orda_
 | [architecture.md](architecture.md) | Luồng thực thi: layout, planning, chunking, autotune |
 | [designer.md](designer.md) | Hướng dẫn thay đổi kernel: contracts, extension checklists |
 | [gpu-validation.md](gpu-validation.md) | Lệnh validation CUDA/HIP |
-| [ci-setup.md](ci-setup.md) | Phạm vi CI và GPU testing |
 
 ---
 

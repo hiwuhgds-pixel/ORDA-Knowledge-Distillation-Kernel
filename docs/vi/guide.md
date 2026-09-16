@@ -127,9 +127,9 @@ Cached tensors phải không `require_grad`. In-place mutation sau construction 
 
 **Skew variants** (`"skew_forward"`, `"skew_js"`, `"skew_reverse"`): nội suy teacher và student với `kl_beta`. `beta` thấp hơn = bảo thủ hơn.
 
-**Entropy-adaptive** (`"entropy_adaptive"`): pha trộn forward/reverse dựa trên teacher entropy. Teacher rows độ tin cậy cao dùng forward KL; rows độ tin cậy thấp dùng reverse.
+**Entropy-adaptive** (`"entropy_adaptive"`): pha trộn forward/reverse dựa trên teacher entropy. Teacher rows độ tin cậy cao (entropy thấp) nghiêng về reverse KL; rows độ tin cậy thấp (entropy cao) nghiêng về forward KL.
 
-**Alpha-divergence** (`"alpha_divergence"`): nội suy power-mean điều khiển bởi `kl_alpha ∈ (0,1)`. Gần 0 → reverse-like; gần 1 → forward-like.
+**Alpha-divergence** (`"alpha_divergence"`): nội suy power-mean điều khiển bởi `kl_alpha ∈ (0,1)`. Gần 0 → forward-like; gần 1 → reverse-like.
 
 **Rényi** (`"renyi"`, `"renyi_reverse"`): tổng quát hóa KL với order parameter `kl_alpha=r ∈ (0,2]`, trừ `|r−1| < 0.01`.
 

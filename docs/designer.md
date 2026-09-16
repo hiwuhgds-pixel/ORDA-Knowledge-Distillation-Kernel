@@ -184,4 +184,4 @@ Consequences for changes:
 | `test_autotune_full_batch_cuda.py` | Bounded full-plan timing contract, 16K/32K launches, `autotune="Max"` coverage. |
 | Multiprocess cache gate (manual) | Cold WAL/schema locking with 8 spawn workers, lease ownership, deterministic OOM-retry double. |
 
-See [gpu-validation.md](gpu-validation.md) for the command matrix and [ci-setup.md](ci-setup.md) for the automated CI scope.
+See [gpu-validation.md](gpu-validation.md) for the command matrix and the repository workflow files for the automated CI scope.

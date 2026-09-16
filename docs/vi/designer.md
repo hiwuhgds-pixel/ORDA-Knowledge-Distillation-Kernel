@@ -184,4 +184,4 @@ Hệ quả cho các thay đổi:
 | `test_autotune_full_batch_cuda.py` | Bounded full-plan timing contract, launch 16K/32K, coverage `autotune="Max"`. |
 | Multiprocess cache gate (thủ công) | Cold WAL/schema locking với 8 spawn workers, lease ownership, OOM-retry double xác định. |
 
-Xem [gpu-validation.md](gpu-validation.md) cho ma trận lệnh và [ci-setup.md](ci-setup.md) cho phạm vi CI tự động.
+Xem [gpu-validation.md](gpu-validation.md) cho ma trận lệnh và các workflow của repository cho phạm vi CI tự động.

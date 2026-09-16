@@ -22,7 +22,6 @@ Triton kernels for cross-entropy and KL-divergence knowledge distillation. `orda
 | [docs/architecture.md](docs/architecture.md) | Execution flow: layout, planning, chunking, autotune |
 | [docs/designer.md](docs/designer.md) | Kernel modification guide: contracts, extension checklists |
 | [docs/gpu-validation.md](docs/gpu-validation.md) | CUDA/HIP validation commands |
-| [docs/ci-setup.md](docs/ci-setup.md) | CI scope and GPU testing |
 
 ---
 

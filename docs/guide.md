@@ -127,9 +127,9 @@ Cached tensors must not `require_grad`. In-place mutation after construction rai
 
 **Skew variants** (`"skew_forward"`, `"skew_js"`, `"skew_reverse"`): interpolates teacher and student with `kl_beta`. Lower `beta` = more conservative.
 
-**Entropy-adaptive** (`"entropy_adaptive"`): blends forward/reverse based on teacher entropy. High-confidence teacher rows use forward KL; low-confidence rows use reverse.
+**Entropy-adaptive** (`"entropy_adaptive"`): blends forward/reverse based on teacher entropy. High-confidence (low-entropy) teacher rows lean toward reverse KL; low-confidence (high-entropy) rows lean toward forward KL.
 
-**Alpha-divergence** (`"alpha_divergence"`): power-mean interpolation controlled by `kl_alpha ∈ (0,1)`. Near 0 → reverse-like; near 1 → forward-like.
+**Alpha-divergence** (`"alpha_divergence"`): power-mean interpolation controlled by `kl_alpha ∈ (0,1)`. Near 0 → forward-like; near 1 → reverse-like.
 
 **Rényi** (`"renyi"`, `"renyi_reverse"`): generalizes KL with order parameter `kl_alpha=r ∈ (0,2]`, excluding `|r−1| < 0.01`.
 
